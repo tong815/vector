@@ -1,0 +1,2534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>矢量画板</title>
+  <style>
+    :root {
+      --bg: #f3f5f7;
+      --panel: #ffffff;
+      --ink: #1a2332;
+      --muted: #5b6573;
+      --line: #d9dee6;
+      --grid: #e7ebf0;
+      --axis: #3d4a5c;
+      --vector: #1d4ed8;
+      --vector-dim: rgba(29, 78, 216, 0.28);
+      --vec-a: #1d4ed8;
+      --vec-b: #c2410c;
+      --vec-r: #6d28d9;
+      --vec-p: #0f766e;
+      --vx: #c2410c;
+      --vy: #047857;
+      --ok: #047857;
+      --ok-bg: #e8f6ef;
+      --warn-bg: #eef3fb;
+      --btn: #1d4ed8;
+      --radius: 10px;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+      --font: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 2px 0 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .pages {
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f7f8fa;
+    }
+
+    .pages button {
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      padding: 8px 14px;
+      font: 650 0.84rem var(--font);
+      cursor: pointer;
+      border-right: 1px solid var(--line);
+    }
+
+    .pages button:last-child { border-right: 0; }
+    .pages button:hover { background: #eef2f7; }
+    .pages button.active {
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .modes {
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f7f8fa;
+    }
+
+    .modes button {
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      padding: 8px 12px;
+      font: 600 0.82rem var(--font);
+      cursor: pointer;
+      border-right: 1px solid var(--line);
+    }
+
+    .modes button:last-child { border-right: 0; }
+
+    .modes button:hover { background: #eef2f7; }
+
+    .modes button.active {
+      background: var(--btn);
+      color: #fff;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 8px 12px;
+      font: 600 0.82rem var(--font);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover { background: #f3f6f9; }
+
+    .btn-primary {
+      background: var(--btn);
+      border-color: var(--btn);
+      color: #fff;
+    }
+
+    .btn-primary:hover { filter: brightness(1.05); }
+
+    main {
+      flex: 1 1 auto;
+      display: flex;
+      min-height: 0;
+    }
+
+    .stage {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      background: #fbfcfd;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: default;
+    }
+
+    .scale-note {
+      position: absolute;
+      left: 12px;
+      bottom: 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.88);
+      padding: 4px 8px;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    aside {
+      flex: 0 0 340px;
+      width: 340px;
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      padding: 16px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .instruction {
+      background: var(--warn-bg);
+      border-color: #d5e0f0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .status {
+      display: none;
+      font-weight: 700;
+      color: var(--ok);
+      background: var(--ok-bg);
+      border-color: #cde7d8;
+    }
+
+    .status.visible { display: block; }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px 12px;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .readout dt { color: var(--muted); }
+
+    .readout dd {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .readout input {
+      width: 4.8em;
+      margin: 0;
+      border: 1px solid #e2e8f0;
+      background: #f7f9fb;
+      border-radius: 6px;
+      text-align: right;
+      font: 650 0.95rem var(--font);
+      padding: 5px 8px;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+    }
+
+    .readout input:hover { border-color: #c5ced9; }
+
+    .readout input:focus {
+      outline: none;
+      border-color: var(--btn);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
+    }
+
+    .readout input:disabled {
+      background: #eef1f4;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    .readout input[readonly] {
+      background: #f4f6f8;
+      border-color: transparent;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .lock-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font: 600 0.72rem var(--font);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+      flex: 0 0 auto;
+    }
+
+    .lock-btn:hover { background: #f3f6f9; }
+
+    .lock-btn[aria-pressed="true"] {
+      background: #e8eefc;
+      border-color: var(--btn);
+      color: var(--btn);
+    }
+
+    .lock-btn svg {
+      display: block;
+      flex: 0 0 auto;
+    }
+
+    .unit {
+      color: var(--muted);
+      font-weight: 650;
+      min-width: 0.9em;
+    }
+
+    .vec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .vec-head h2 { margin: 0; }
+
+    .rep-btn {
+      border: 1px solid var(--line);
+      background: #f7f8fa;
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font: 600 0.72rem var(--font);
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .lock-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .fill-hint {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .hidden { display: none !important; }
+
+    .formula {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    .formula .live {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vx { color: var(--vx); font-weight: 650; }
+    .vy { color: var(--vy); font-weight: 650; }
+
+    .challenge-task {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      min-height: 2.6em;
+    }
+
+    .challenge-actions {
+      margin-top: 10px;
+    }
+
+    footer.hint {
+      margin-top: auto;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .readout dd.plain {
+      display: block;
+      text-align: right;
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+    }
+
+    h2.vec-a, h2.vec-b, h2.vec-r, h2.vec-p {
+      letter-spacing: 0;
+      font-size: 0.82rem;
+      text-transform: none;
+    }
+    h2.vec-a { color: var(--vec-a); }
+    h2.vec-b { color: var(--vec-b); }
+    h2.vec-r { color: var(--vec-r); }
+    h2.vec-p { color: var(--vec-p); }
+
+    .eq-line {
+      margin: 4px 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .split .card {
+      margin: 0;
+      box-shadow: none;
+    }
+
+    .sign-card {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .sign-card.pos { color: var(--ok); background: var(--ok-bg); border-color: #cde7d8; }
+    .sign-card.zero { color: #92400e; background: #fff7ed; border-color: #fed7aa; }
+    .sign-card.neg { color: #9f1239; background: #fff1f2; border-color: #fecdd3; }
+
+    @media (max-width: 860px) {
+      header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-controls { justify-content: flex-start; }
+
+      main { flex-direction: column; }
+
+      aside {
+        flex: 0 0 auto;
+        width: 100%;
+        max-height: 42vh;
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .stage { min-height: 58vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>矢量画板</h1>
+      <p class="subtitle" id="subtitle">矢量是既有大小、又有方向的物理量。</p>
+    </div>
+    <div class="header-controls">
+      <div class="pages" role="tablist" aria-label="学习页面">
+        <button id="page-1" class="active" type="button">1 基础</button>
+        <button id="page-2" type="button">2 矢量加法</button>
+        <button id="page-3" type="button">3 点乘</button>
+      </div>
+      <div class="toolbar" id="toolbar-p1">
+        <div class="modes" role="tablist" aria-label="学习模式">
+          <button id="mode-magnitude" class="active" type="button">大小与方向</button>
+          <button id="mode-move" type="button">平移矢量</button>
+          <button id="mode-components" type="button">正交分解</button>
+        </div>
+        <button id="reset-btn" class="btn" type="button">重置矢量</button>
+      </div>
+      <div class="toolbar hidden" id="toolbar-p2">
+        <div class="modes" role="tablist" aria-label="加法模式">
+          <button id="add-independent" class="active" type="button">两个矢量</button>
+          <button id="add-head" type="button">首尾相接</button>
+          <button id="add-swap" type="button">交换 A 和 B</button>
+          <button id="add-comp" type="button">显示分量</button>
+        </div>
+        <button id="reset-add" class="btn" type="button">重置矢量</button>
+      </div>
+      <div class="toolbar hidden" id="toolbar-p3">
+        <div class="modes" role="tablist" aria-label="点乘模式">
+          <button id="dot-angle" class="active" type="button">相对方向</button>
+          <button id="dot-proj" type="button">显示投影</button>
+          <button id="dot-build" type="button">构成点乘</button>
+          <button id="dot-comp" type="button">分量公式</button>
+        </div>
+        <button id="reset-dot" class="btn" type="button">重置矢量</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage" id="stage">
+      <canvas id="plane" aria-label="带可拖动矢量的坐标平面"></canvas>
+      <div class="scale-note">网格：每格 = 1 个单位</div>
+    </div>
+
+    <aside>
+      <div class="card instruction" id="instruction"></div>
+      <div class="card status" id="status"></div>
+
+      <div id="panel-p1">
+      <div class="card" id="ed-p1">
+        <div class="vec-head">
+          <h2>当前矢量</h2>
+          <button type="button" class="rep-btn">坐标表示</button>
+        </div>
+        <p class="fill-hint">可拖动或填写。锁定后，拖箭头时该项保持不变。</p>
+        <dl class="readout">
+          <dt class="row-polar">大小</dt>
+          <dd class="row-polar">
+            <input id="in-mag" data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="大小" value="5.00" />
+          </dd>
+          <dt class="row-polar">方向</dt>
+          <dd class="row-polar">
+            <input id="in-ang" data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="方向" value="36.9" />
+            <span class="unit">°</span>
+          </dd>
+          <dt class="row-xy hidden">x 分量</dt>
+          <dd class="row-xy hidden">
+            <input id="in-vx" data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="x 分量" value="4.00" />
+          </dd>
+          <dt class="row-xy hidden">y 分量</dt>
+          <dd class="row-xy hidden">
+            <input id="in-vy" data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="y 分量" value="3.00" />
+          </dd>
+        </dl>
+        <div class="lock-bar">
+          <button type="button" class="lock-btn" id="lock-mag" data-lock="mag" aria-pressed="false" title="锁定模长：拖动时大小不变，只能改变方向">
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>
+            锁模长
+          </button>
+          <button type="button" class="lock-btn" id="lock-ang" data-lock="ang" aria-pressed="false" title="锁定角度：拖动时方向不变，只能改变长短">
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>
+            锁角度
+          </button>
+        </div>
+        <div class="formula hidden" id="formula">
+          <div><span class="vx">v<sub>x</sub></span> = 大小 × cos(θ)</div>
+          <div><span class="vy">v<sub>y</sub></span> = 大小 × sin(θ)</div>
+          <div class="live" id="formula-live"></div>
+        </div>
+      </div>
+      </div>
+
+      <div id="panel-p2" class="hidden">
+        <div class="card" id="ed-p2a">
+          <div class="vec-head">
+            <h2 class="vec-a">矢量 A</h2>
+            <button type="button" class="rep-btn">坐标表示</button>
+          </div>
+          <dl class="readout">
+            <dt class="row-polar">大小</dt>
+            <dd class="row-polar">
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="A 大小" value="4.12" />
+            </dd>
+            <dt class="row-polar">方向</dt>
+            <dd class="row-polar">
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="A 方向" value="14.0" />
+              <span class="unit">°</span>
+            </dd>
+            <dt class="row-xy hidden">x 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Ax" value="4.00" /></dd>
+            <dt class="row-xy hidden">y 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="Ay" value="1.00" /></dd>
+          </dl>
+          <div class="lock-bar">
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+          </div>
+        </div>
+        <div class="card" id="ed-p2b">
+          <div class="vec-head">
+            <h2 class="vec-b">矢量 B</h2>
+            <button type="button" class="rep-btn">坐标表示</button>
+          </div>
+          <dl class="readout">
+            <dt class="row-polar">大小</dt>
+            <dd class="row-polar">
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="B 大小" value="3.16" />
+            </dd>
+            <dt class="row-polar">方向</dt>
+            <dd class="row-polar">
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="B 方向" value="71.6" />
+              <span class="unit">°</span>
+            </dd>
+            <dt class="row-xy hidden">x 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Bx" value="1.00" /></dd>
+            <dt class="row-xy hidden">y 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="By" value="3.00" /></dd>
+          </dl>
+          <div class="lock-bar">
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+          </div>
+        </div>
+        <div class="card hidden" id="p2-r-card">
+          <div class="vec-head">
+            <h2 class="vec-r">合矢量 R = A + B</h2>
+            <button type="button" class="rep-btn" id="p2r-rep">坐标表示</button>
+          </div>
+          <dl class="readout" id="ed-p2r">
+            <dt class="row-polar">大小</dt>
+            <dd class="row-polar"><input data-k="mag" type="text" readonly tabindex="-1" value="6.40" /></dd>
+            <dt class="row-polar">方向</dt>
+            <dd class="row-polar"><input data-k="ang" type="text" readonly tabindex="-1" value="38.7" /><span class="unit">°</span></dd>
+            <dt class="row-xy hidden">x 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vx" type="text" readonly tabindex="-1" value="5.00" /></dd>
+            <dt class="row-xy hidden">y 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vy" type="text" readonly tabindex="-1" value="4.00" /></dd>
+          </dl>
+          <div class="formula" id="p2-eq"></div>
+        </div>
+      </div>
+
+      <div id="panel-p3" class="hidden">
+        <div class="card hidden" id="p3-sign"></div>
+        <div class="card" id="ed-p3a">
+          <div class="vec-head">
+            <h2 class="vec-a">矢量 A</h2>
+            <button type="button" class="rep-btn">坐标表示</button>
+          </div>
+          <dl class="readout">
+            <dt class="row-polar">大小 |A|</dt>
+            <dd class="row-polar">
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="A 大小" value="5.00" />
+            </dd>
+            <dt class="row-polar">方向</dt>
+            <dd class="row-polar">
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="A 方向" value="0.0" />
+              <span class="unit">°</span>
+            </dd>
+            <dt class="row-xy hidden">x 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Ax" value="5.00" /></dd>
+            <dt class="row-xy hidden">y 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="Ay" value="0.00" /></dd>
+          </dl>
+          <div class="lock-bar">
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+          </div>
+        </div>
+        <div class="card" id="ed-p3b">
+          <div class="vec-head">
+            <h2 class="vec-b">矢量 B</h2>
+            <button type="button" class="rep-btn">坐标表示</button>
+          </div>
+          <dl class="readout">
+            <dt class="row-polar">大小 |B|</dt>
+            <dd class="row-polar">
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="B 大小" value="5.00" />
+            </dd>
+            <dt class="row-polar">方向</dt>
+            <dd class="row-polar">
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="B 方向" value="53.1" />
+              <span class="unit">°</span>
+            </dd>
+            <dt class="row-xy hidden">x 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Bx" value="3.00" /></dd>
+            <dt class="row-xy hidden">y 分量</dt>
+            <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="By" value="4.00" /></dd>
+          </dl>
+          <div class="lock-bar">
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>夹角</h2>
+          <dl class="readout">
+            <dt>A 与 B 的夹角 θ</dt><dd class="plain" id="p3-th">53.1°</dd>
+            <dt id="p3-cos-label" class="hidden">cos(θ)</dt><dd class="plain hidden" id="p3-cos">0.60</dd>
+          </dl>
+        </div>
+        <div class="card hidden" id="p3-proj-card">
+          <h2 class="vec-p">B 在 A 上的投影</h2>
+          <div class="eq-line" id="p3-proj-eq"></div>
+        </div>
+        <div class="card hidden" id="p3-dot-card">
+          <h2>点乘</h2>
+          <div id="p3-dot-body"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>挑战</h2>
+        <div class="challenge-task" id="challenge-text">点击「新挑战」开始练习。</div>
+        <div class="challenge-actions">
+          <button id="challenge-btn" class="btn btn-primary" type="button">新挑战</button>
+        </div>
+      </div>
+
+      <p class="hint" id="page-hint">
+        拖蓝色实心圆，或在右侧填写大小和方向。拖空心圆或箭杆可以平移整根矢量。
+      </p>
+    </aside>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // ----- DOM -----
+      const canvas = document.getElementById("plane");
+      const stage = document.getElementById("stage");
+      const ctx = canvas.getContext("2d");
+
+      const instructionEl = document.getElementById("instruction");
+      const statusEl = document.getElementById("status");
+      const inMag = document.getElementById("in-mag");
+      const inAng = document.getElementById("in-ang");
+      const inVx = document.getElementById("in-vx");
+      const inVy = document.getElementById("in-vy");
+      const lockMagBtn = document.getElementById("lock-mag");
+      const lockAngBtn = document.getElementById("lock-ang");
+      const formulaEl = document.getElementById("formula");
+      const formulaLive = document.getElementById("formula-live");
+      const challengeText = document.getElementById("challenge-text");
+
+      const modeButtons = {
+        magnitude: document.getElementById("mode-magnitude"),
+        move: document.getElementById("mode-move"),
+        components: document.getElementById("mode-components")
+      };
+
+      // ----- State -----
+      // The vector is stored as a tail point plus components (vx, vy).
+      // Translating changes only the tail; resizing the tip changes vx and vy.
+      const state = {
+        tail: { x: 0, y: 0 },
+        vx: 4,
+        vy: 3,
+        mode: "magnitude",
+        ghost: null,          // 「平移矢量」模式里的原矢量快照
+        hover: null,          // "tip" | "tail" | "body" | null
+        drag: null,           // { kind, grabX, grabY }
+        challenge: null,
+        lockMag: false,
+        lockAng: false,
+        lockedMag: 5,
+        lockedAng: 36.8698976458,
+        rep: "polar"
+      };
+
+      let cssW = 0;
+      let cssH = 0;
+      let originX = 0;
+      let originY = 0;
+      let pxPerUnit = 40;
+
+      const HANDLE_R = 9;
+      const HIT_R = 16;
+      const MAX_MAG = 12;
+      const MIN_MAG = 0.2;
+
+      const TEXT = {
+        magnitude: "拖动箭头。把它拉长，什么变了？把它转一转，什么变了？",
+        move: "平移这根矢量，不要改变它的大小和方向。",
+        components: "矢量是斜边。水平分量和竖直分量，就是直角三角形的两条直角边。"
+      };
+
+      let currentPage = 1;
+
+      const COL = {
+        A: "#1d4ed8",
+        B: "#c2410c",
+        R: "#6d28d9",
+        P: "#0f766e"
+      };
+
+      const add = {
+        A: { tail: { x: -3, y: -1 }, vx: 4, vy: 1, lockMag: false, lockAng: false, lockedMag: Math.hypot(4, 1), lockedAng: Math.atan2(1, 4) * 180 / Math.PI, rep: "polar" },
+        B: { tail: { x: 1, y: -2 }, vx: 1, vy: 3, lockMag: false, lockAng: false, lockedMag: Math.hypot(1, 3), lockedAng: Math.atan2(3, 1) * 180 / Math.PI, rep: "polar" },
+        repR: "polar",
+        mode: "independent",
+        hover: null,
+        challenge: null,
+        snap: null
+      };
+
+      const dotp = {
+        tail: { x: 0, y: 0 },
+        A: { vx: 5, vy: 0, lockMag: false, lockAng: false, lockedMag: 5, lockedAng: 0, rep: "polar" },
+        B: { vx: 3, vy: 4, lockMag: false, lockAng: false, lockedMag: 5, lockedAng: Math.atan2(4, 3) * 180 / Math.PI, rep: "polar" },
+        mode: "angle",
+        hover: null,
+        challenge: null,
+        snap: null
+      };
+
+      const ADD_TEXT = {
+        independent: "现在有两个矢量。怎样找出它们的共同效果？",
+        head: "先沿 A 走，再沿 B 走。合矢量给出总的改变。",
+        swap: "路径不同，但终点相同。",
+        components: "把矢量相加，就是把各个坐标方向上的效果分别相加。"
+      };
+
+      const DOT_TEXT = {
+        angle: "转动 B。当 B 更指向 A，或更背离 A 时，什么变了？",
+        projection: "投影告诉我们：B 有多少落在 A 的方向上。",
+        build: "A · B = |A| ×（B 在 A 上的投影）。投影再写成 |B| cosθ，就得到点乘。",
+        components: "几何公式和分量公式，描述的是同一个量。"
+      };
+
+      const PAGE_SUB = {
+        1: "矢量是既有大小、又有方向的物理量。",
+        2: "矢量加法表示两个矢量的共同效果。",
+        3: "点乘表示一个矢量沿另一个矢量方向有多少。"
+      };
+
+      const PAGE_HINT = {
+        1: "拖蓝色实心圆，或在右侧填写大小和方向。拖空心圆或箭杆可以平移整根矢量。",
+        2: "拖 A、B 的箭头尖改变大小和方向。拖空心圆可以平移该矢量。",
+        3: "拖 A、B 的箭头尖。拖公共箭尾可以一起平移。"
+      };
+
+      // ----- Math -----
+      function calculateMagnitude(vx, vy) {
+        return Math.hypot(vx, vy);
+      }
+
+      // Counterclockwise from +x axis, in degrees [0, 360).
+      // Returns null when the vector is too short for a meaningful angle.
+      function calculateAngle(vx, vy) {
+        if (calculateMagnitude(vx, vy) < MIN_MAG) return null;
+        let deg = Math.atan2(vy, vx) * 180 / Math.PI;
+        if (deg < 0) deg += 360;
+        return deg;
+      }
+
+      function angleDiff(a, b) {
+        let d = Math.abs(a - b) % 360;
+        if (d > 180) d = 360 - d;
+        return d;
+      }
+
+      function near(a, b, tol) {
+        return Math.abs(a - b) <= tol;
+      }
+
+      function format(n, digits) {
+        return n.toFixed(digits);
+      }
+
+      function parseNum(raw) {
+        const s = String(raw).replace(/°/g, "").replace(/,/g, ".").trim();
+        if (s === "" || s === "-" || s === "." || s === "-.") return NaN;
+        return Number(s);
+      }
+
+      function looksComplete(raw) {
+        const s = String(raw).replace(/°/g, "").replace(/,/g, ".").trim();
+        if (s === "" || s === "-" || /\.$/.test(s)) return false;
+        return isFinite(parseNum(s));
+      }
+
+      function wrapAngle(deg) {
+        deg = deg % 360;
+        if (deg < 0) deg += 360;
+        return deg;
+      }
+
+      function setPolarOn(vec, mag, deg) {
+        mag = clamp(Math.abs(mag), 0, MAX_MAG);
+        const rad = wrapAngle(deg) * Math.PI / 180;
+        vec.vx = mag * Math.cos(rad);
+        vec.vy = mag * Math.sin(rad);
+      }
+
+      function setComponentsFromPolar(mag, deg) {
+        setPolarOn(state, mag, deg);
+      }
+
+      function applyLocksTo(vec, vx, vy) {
+        if (vec.lockMag && vec.lockAng) {
+          setPolarOn(vec, vec.lockedMag, vec.lockedAng);
+          return;
+        }
+
+        if (vec.lockAng) {
+          const rad = wrapAngle(vec.lockedAng) * Math.PI / 180;
+          const ux = Math.cos(rad);
+          const uy = Math.sin(rad);
+          let mag = vx * ux + vy * uy;
+          mag = clamp(mag, MIN_MAG, MAX_MAG);
+          vec.vx = mag * ux;
+          vec.vy = mag * uy;
+          return;
+        }
+
+        if (vec.lockMag) {
+          const m = Math.hypot(vx, vy);
+          if (m < 1e-6) return;
+          const keep = clamp(vec.lockedMag, MIN_MAG, MAX_MAG);
+          vec.vx = vx / m * keep;
+          vec.vy = vy / m * keep;
+          return;
+        }
+
+        const mag = Math.hypot(vx, vy);
+        if (mag > MAX_MAG && mag > 0) {
+          vx *= MAX_MAG / mag;
+          vy *= MAX_MAG / mag;
+        }
+        vec.vx = vx;
+        vec.vy = vy;
+      }
+
+      function toggleLockOn(vec, which) {
+        if (which === "mag") {
+          if (vec.lockMag) {
+            vec.lockMag = false;
+          } else {
+            vec.lockMag = true;
+            vec.lockedMag = clamp(calculateMagnitude(vec.vx, vec.vy), MIN_MAG, MAX_MAG);
+            let ang = calculateAngle(vec.vx, vec.vy);
+            if (ang === null) ang = 0;
+            setPolarOn(vec, vec.lockedMag, ang);
+          }
+        } else {
+          if (vec.lockAng) {
+            vec.lockAng = false;
+          } else {
+            const ang = calculateAngle(vec.vx, vec.vy);
+            if (ang === null) return false;
+            vec.lockAng = true;
+            vec.lockedAng = ang;
+          }
+        }
+        return true;
+      }
+
+      function clamp(n, lo, hi) {
+        return Math.max(lo, Math.min(hi, n));
+      }
+
+      function constrainComponents(vx, vy) {
+        applyLocksTo(state, vx, vy);
+      }
+
+      function clampVector(vx, vy) {
+        const mag = Math.hypot(vx, vy);
+        if (mag > MAX_MAG && mag > 0) {
+          return { vx: vx * MAX_MAG / mag, vy: vy * MAX_MAG / mag };
+        }
+        return { vx: vx, vy: vy };
+      }
+
+      function calculateDotProduct(ax, ay, bx, by) {
+        return ax * bx + ay * by;
+      }
+
+      // Smaller angle between two vectors, in degrees [0, 180]. Null if either is too short.
+      function calculateVectorAngle(ax, ay, bx, by) {
+        const ma = calculateMagnitude(ax, ay);
+        const mb = calculateMagnitude(bx, by);
+        if (ma < MIN_MAG || mb < MIN_MAG) return null;
+        const c = clamp(calculateDotProduct(ax, ay, bx, by) / (ma * mb), -1, 1);
+        return Math.acos(c) * 180 / Math.PI;
+      }
+
+      // Signed projection of B onto A. Null if A is too short.
+      function calculateProjection(ax, ay, bx, by) {
+        const ma2 = ax * ax + ay * ay;
+        if (ma2 < MIN_MAG * MIN_MAG) return null;
+        const dot = calculateDotProduct(ax, ay, bx, by);
+        const ma = Math.sqrt(ma2);
+        const scale = dot / ma2;
+        return {
+          length: dot / ma,
+          vx: scale * ax,
+          vy: scale * ay
+        };
+      }
+
+      function fmtAng(ang) {
+        return ang === null ? "—" : format(ang, 1) + "°";
+      }
+
+      // ----- Coordinates -----
+      function worldToScreen(x, y) {
+        return {
+          x: originX + x * pxPerUnit,
+          y: originY - y * pxPerUnit
+        };
+      }
+
+      function screenToWorld(sx, sy) {
+        return {
+          x: (sx - originX) / pxPerUnit,
+          y: (originY - sy) / pxPerUnit
+        };
+      }
+
+      function tipPoint() {
+        return { x: state.tail.x + state.vx, y: state.tail.y + state.vy };
+      }
+
+      // ----- Drawing -----
+      function drawGrid() {
+        const halfX = cssW / (2 * pxPerUnit);
+        const halfY = cssH / (2 * pxPerUnit);
+        const xMin = Math.floor(-halfX) - 1;
+        const xMax = Math.ceil(halfX) + 1;
+        const yMin = Math.floor(-halfY) - 1;
+        const yMax = Math.ceil(halfY) + 1;
+
+        ctx.save();
+        ctx.lineWidth = 1;
+
+        for (let x = xMin; x <= xMax; x++) {
+          const p = worldToScreen(x, 0);
+          ctx.strokeStyle = x === 0 ? "transparent" : (x % 5 === 0 ? "#d7dce3" : "#eceff3");
+          ctx.beginPath();
+          ctx.moveTo(p.x, 0);
+          ctx.lineTo(p.x, cssH);
+          ctx.stroke();
+        }
+
+        for (let y = yMin; y <= yMax; y++) {
+          const p = worldToScreen(0, y);
+          ctx.strokeStyle = y === 0 ? "transparent" : (y % 5 === 0 ? "#d7dce3" : "#eceff3");
+          ctx.beginPath();
+          ctx.moveTo(0, p.y);
+          ctx.lineTo(cssW, p.y);
+          ctx.stroke();
+        }
+
+        // Axes
+        const o = worldToScreen(0, 0);
+        ctx.strokeStyle = "#3d4a5c";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, o.y);
+        ctx.lineTo(cssW, o.y);
+        ctx.moveTo(o.x, 0);
+        ctx.lineTo(o.x, cssH);
+        ctx.stroke();
+
+        drawAxisArrow(cssW - 14, o.y, 0);
+        drawAxisArrow(o.x, 14, -Math.PI / 2);
+
+        // Tick labels
+        const step = pxPerUnit >= 34 ? 1 : 2;
+        ctx.fillStyle = "#5b6573";
+        ctx.font = "12px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
+
+        for (let x = xMin; x <= xMax; x++) {
+          if (x === 0 || x % step !== 0) continue;
+          const p = worldToScreen(x, 0);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          ctx.fillText(String(x), p.x, p.y + 6);
+        }
+
+        for (let y = yMin; y <= yMax; y++) {
+          if (y === 0 || y % step !== 0) continue;
+          const p = worldToScreen(0, y);
+          ctx.textAlign = "right";
+          ctx.textBaseline = "middle";
+          ctx.fillText(String(y), p.x - 8, p.y);
+        }
+
+        ctx.fillStyle = "#1a2332";
+        ctx.font = "600 13px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText("x", cssW - 22, o.y + 8);
+        ctx.textAlign = "left";
+        ctx.fillText("y", o.x + 8, 8);
+
+        ctx.beginPath();
+        ctx.fillStyle = "#1a2332";
+        ctx.arc(o.x, o.y, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = "12px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "top";
+        ctx.fillText("O", o.x - 8, o.y + 6);
+
+        ctx.restore();
+      }
+
+      function drawAxisArrow(x, y, angle) {
+        const len = 10;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - len * Math.cos(angle) + 5 * Math.sin(angle), y - len * Math.sin(angle) - 5 * Math.cos(angle));
+        ctx.lineTo(x - len * Math.cos(angle) - 5 * Math.sin(angle), y - len * Math.sin(angle) + 5 * Math.cos(angle));
+        ctx.closePath();
+        ctx.fillStyle = "#3d4a5c";
+        ctx.fill();
+      }
+
+      function drawVector(tail, vx, vy, options) {
+        const opts = options || {};
+        const color = opts.color || "#1d4ed8";
+        const width = opts.width || 4;
+        const dashed = !!opts.dashed;
+        const showHead = opts.showHead !== false;
+
+        const tip = { x: tail.x + vx, y: tail.y + vy };
+        const p0 = worldToScreen(tail.x, tail.y);
+        const p1 = worldToScreen(tip.x, tip.y);
+        const dx = p1.x - p0.x;
+        const dy = p1.y - p0.y;
+        const len = Math.hypot(dx, dy);
+        if (len < 2) return;
+
+        const angle = Math.atan2(dy, dx);
+        const headLen = Math.min(18, Math.max(10, len * 0.2));
+        const headW = 7;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (dashed) ctx.setLineDash([7, 6]);
+
+        const endX = showHead ? p1.x - Math.cos(angle) * (headLen - 1) : p1.x;
+        const endY = showHead ? p1.y - Math.sin(angle) * (headLen - 1) : p1.y;
+
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        if (showHead && len > 8) {
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(
+            p1.x - headLen * Math.cos(angle) + headW * Math.sin(angle),
+            p1.y - headLen * Math.sin(angle) - headW * Math.cos(angle)
+          );
+          ctx.lineTo(
+            p1.x - headLen * Math.cos(angle) - headW * Math.sin(angle),
+            p1.y - headLen * Math.sin(angle) + headW * Math.cos(angle)
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function drawDotted(x0, y0, x1, y1, color) {
+        const p0 = worldToScreen(x0, y0);
+        const p1 = worldToScreen(x1, y1);
+        ctx.save();
+        ctx.strokeStyle = color || "#94a3b8";
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawComponents() {
+        const t = state.tail;
+        const vx = state.vx;
+        const vy = state.vy;
+        const corner = { x: t.x + vx, y: t.y };
+        const tip = tipPoint();
+
+        // Dotted right triangle / rectangle guides
+        drawDotted(t.x, t.y, corner.x, corner.y, "#cbd5e1");
+        drawDotted(corner.x, corner.y, tip.x, tip.y, "#cbd5e1");
+        drawDotted(t.x, t.y, t.x, t.y + vy, "#cbd5e1");
+        drawDotted(t.x, t.y + vy, tip.x, tip.y, "#cbd5e1");
+
+        drawVector(t, vx, 0, { color: "#c2410c", width: 3.2 });
+        drawVector(corner, 0, vy, { color: "#047857", width: 3.2 });
+
+        // Small right-angle mark at the corner of the triangle
+        const s = 0.28;
+        const pA = worldToScreen(corner.x - Math.sign(vx || 1) * s, corner.y);
+        const pB = worldToScreen(corner.x - Math.sign(vx || 1) * s, corner.y + Math.sign(vy || 1) * s);
+        const pC = worldToScreen(corner.x, corner.y + Math.sign(vy || 1) * s);
+        ctx.save();
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(pA.x, pA.y);
+        ctx.lineTo(pB.x, pB.y);
+        ctx.lineTo(pC.x, pC.y);
+        ctx.stroke();
+        ctx.restore();
+
+        labelComponent("vx", t.x + vx / 2, t.y, "#c2410c", vy >= 0 ? 1 : -1);
+        labelComponent("vy", t.x + vx, t.y + vy / 2, "#047857", vx >= 0 ? 1 : -1);
+      }
+
+      function labelComponent(text, x, y, color, side) {
+        const p = worldToScreen(x, y);
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.font = "600 13px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const ox = text === "vy" ? side * 16 : 0;
+        const oy = text === "vx" ? side * 14 : 0;
+        ctx.fillText(text, p.x + ox, p.y + oy);
+        ctx.restore();
+      }
+
+      function drawHandle(x, y, kind, active, color) {
+        const p = worldToScreen(x, y);
+        const r = HANDLE_R + (active ? 1.5 : 0);
+        const stroke = color || "#1d4ed8";
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        if (kind === "tip") {
+          ctx.fillStyle = stroke;
+          ctx.fill();
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = "#ffffff";
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.lineWidth = 2.6;
+          ctx.strokeStyle = stroke;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function drawVectorLabel(tail, vx, vy, name, color) {
+        const mag = Math.hypot(vx, vy);
+        let ox = 0;
+        let oy = 0.42;
+        if (mag > 0.05) {
+          ox = -vy / mag * 0.42;
+          oy = vx / mag * 0.42;
+        }
+        const p = worldToScreen(tail.x + vx * 0.52 + ox, tail.y + vy * 0.52 + oy);
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.font = "700 14px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(name, p.x, p.y);
+        ctx.restore();
+      }
+
+      function drawNamedVector(tail, vx, vy, name, color, options) {
+        const opts = options || {};
+        const faded = !!opts.faded;
+        const col = faded ? opts.fadeColor || color : color;
+        drawVector(tail, vx, vy, {
+          color: col,
+          width: faded ? 3.1 : (opts.width || 4.2),
+          dashed: faded || !!opts.dashed
+        });
+        if (name) drawVectorLabel(tail, vx, vy, name, faded ? color : color);
+        if (opts.handles) {
+          const tip = { x: tail.x + vx, y: tail.y + vy };
+          const hv = opts.hover || {};
+          if (opts.handles !== "tip") {
+            drawHandle(tail.x, tail.y, "tail", hv.kind === "tail", color);
+          }
+          if (opts.handles !== "tail") {
+            drawHandle(tip.x, tip.y, "tip", hv.kind === "tip", color);
+          }
+        }
+      }
+
+      function drawMiniComponents(tail, vx, vy, color) {
+        const corner = { x: tail.x + vx, y: tail.y };
+        drawDotted(tail.x, tail.y, corner.x, corner.y, "#cbd5e1");
+        drawDotted(corner.x, corner.y, tail.x + vx, tail.y + vy, "#cbd5e1");
+        drawVector(tail, vx, 0, { color: color, width: 2.2 });
+        drawVector(corner, 0, vy, { color: color, width: 2.2 });
+      }
+
+      function drawResultant(tail, vx, vy) {
+        drawNamedVector(tail, vx, vy, "R", COL.R, { width: 4.6 });
+      }
+
+      function drawLockGuidesOn(tail, vec, color) {
+        if (!vec) return;
+        ctx.save();
+        if (vec.lockMag && vec.lockedMag >= MIN_MAG) {
+          const c = worldToScreen(tail.x, tail.y);
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, vec.lockedMag * pxPerUnit, 0, Math.PI * 2);
+          ctx.strokeStyle = color || "rgba(29, 78, 216, 0.32)";
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([5, 4]);
+          ctx.stroke();
+        }
+        if (vec.lockAng) {
+          const rad = wrapAngle(vec.lockedAng) * Math.PI / 180;
+          drawDotted(
+            tail.x,
+            tail.y,
+            tail.x + 24 * Math.cos(rad),
+            tail.y + 24 * Math.sin(rad),
+            color || "rgba(29, 78, 216, 0.38)"
+          );
+        }
+        ctx.restore();
+      }
+
+      function drawLockGuides() {
+        drawLockGuidesOn(state.tail, state, "rgba(29, 78, 216, 0.32)");
+      }
+
+      function hoverOf(store, vec) {
+        const bSet = { B: 1, B0: 1, Bt: 1 };
+        function isMatch(id) {
+          if (!id) return false;
+          if (vec === "A") return id === "A";
+          if (bSet[vec]) return !!bSet[id];
+          return id === vec;
+        }
+        if (state.drag && isMatch(state.drag.vec)) return { kind: state.drag.kind };
+        if (store.hover && isMatch(store.hover.vec)) return store.hover;
+        return {};
+      }
+
+      function drawPage2() {
+        const A = add.A;
+        const B = add.B;
+        const mode = add.mode;
+        const origin = A.tail;
+        const aTip = { x: origin.x + A.vx, y: origin.y + A.vy };
+        const bOrigin = { x: origin.x + B.vx, y: origin.y + B.vy };
+
+        drawLockGuidesOn(A.tail, A, "rgba(29, 78, 216, 0.32)");
+        drawLockGuidesOn(B.tail, B, "rgba(194, 65, 12, 0.35)");
+
+        if (mode === "independent") {
+          drawNamedVector(A.tail, A.vx, A.vy, "A", COL.A, { handles: true, hover: hoverOf(add, "A") });
+          drawNamedVector(B.tail, B.vx, B.vy, "B", COL.B, { handles: true, hover: hoverOf(add, "B") });
+          return;
+        }
+
+        // Original B remains visible so translating it is obviously the same vector.
+        drawNamedVector(B.tail, B.vx, B.vy, "B", COL.B, {
+          faded: true,
+          dashed: true,
+          fadeColor: "rgba(194, 65, 12, 0.32)",
+          handles: true,
+          hover: hoverOf(add, "B0")
+        });
+
+        if (mode === "swap") {
+          drawNamedVector(origin, A.vx, A.vy, "", COL.A, { faded: true, fadeColor: "rgba(29, 78, 216, 0.28)" });
+          drawNamedVector(aTip, B.vx, B.vy, "", COL.B, { faded: true, fadeColor: "rgba(194, 65, 12, 0.28)" });
+          drawNamedVector(origin, B.vx, B.vy, "B", COL.B, { handles: true, hover: hoverOf(add, "B") });
+          drawNamedVector(bOrigin, A.vx, A.vy, "A", COL.A, { handles: true, hover: hoverOf(add, "A") });
+        } else {
+          drawNamedVector(origin, A.vx, A.vy, "A", COL.A, { handles: true, hover: hoverOf(add, "A") });
+          drawNamedVector(aTip, B.vx, B.vy, "B", COL.B, { handles: true, hover: hoverOf(add, "Bt") });
+        }
+
+        drawResultant(origin, A.vx + B.vx, A.vy + B.vy);
+
+        if (mode === "components") {
+          drawMiniComponents(origin, A.vx, A.vy, COL.A);
+          drawMiniComponents(aTip, B.vx, B.vy, COL.B);
+        }
+      }
+
+      function drawAngleArc(tail, ax, ay, bx, by) {
+        const ma = Math.hypot(ax, ay);
+        const mb = Math.hypot(bx, by);
+        if (ma < MIN_MAG || mb < MIN_MAG) return;
+        const a0 = Math.atan2(ay, ax);
+        const a1 = Math.atan2(by, bx);
+        let delta = a1 - a0;
+        while (delta > Math.PI) delta -= 2 * Math.PI;
+        while (delta < -Math.PI) delta += 2 * Math.PI;
+        const c = worldToScreen(tail.x, tail.y);
+        const r = Math.min(ma, mb, 2.2) * 0.42 * pxPerUnit;
+        ctx.save();
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r, -a0, -a0 - delta, delta > 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawProjection() {
+        const ax = dotp.A.vx;
+        const ay = dotp.A.vy;
+        const bx = dotp.B.vx;
+        const by = dotp.B.vy;
+        const t = dotp.tail;
+        const proj = calculateProjection(ax, ay, bx, by);
+        if (!proj) return;
+
+        const reach = 18;
+        const ma = Math.hypot(ax, ay);
+        const ux = ax / ma;
+        const uy = ay / ma;
+        drawDotted(t.x - ux * reach, t.y - uy * reach, t.x + ux * reach, t.y + uy * reach, "rgba(15, 118, 110, 0.35)");
+        drawNamedVector(t, proj.vx, proj.vy, "", COL.P, { width: 3.6 });
+        drawDotted(t.x + bx, t.y + by, t.x + proj.vx, t.y + proj.vy, "#94a3b8");
+
+        const mid = worldToScreen(t.x + proj.vx * 0.5, t.y + proj.vy * 0.5);
+        ctx.save();
+        ctx.fillStyle = COL.P;
+        ctx.font = "600 12px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("投影", mid.x, mid.y - 12);
+        ctx.restore();
+      }
+
+      function drawPage3() {
+        const t = dotp.tail;
+        drawLockGuidesOn(t, dotp.A, "rgba(29, 78, 216, 0.32)");
+        drawLockGuidesOn(t, dotp.B, "rgba(194, 65, 12, 0.35)");
+        if (dotp.mode !== "angle") drawProjection();
+        drawAngleArc(t, dotp.A.vx, dotp.A.vy, dotp.B.vx, dotp.B.vy);
+        drawNamedVector(t, dotp.A.vx, dotp.A.vy, "A", COL.A, { handles: "tip", hover: hoverOf(dotp, "A") });
+        drawNamedVector(t, dotp.B.vx, dotp.B.vy, "B", COL.B, { handles: "tip", hover: hoverOf(dotp, "B") });
+        drawHandle(t.x, t.y, "tail", !!(dotp.hover && dotp.hover.kind === "tail") || !!(state.drag && state.drag.kind === "tail"), "#334155");
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cssW, cssH);
+        drawGrid();
+        if (currentPage === 2) {
+          drawPage2();
+          return;
+        }
+        if (currentPage === 3) {
+          drawPage3();
+          return;
+        }
+        drawLockGuides();
+
+        if (state.mode === "move" && state.ghost) {
+          drawVector(state.ghost.tail, state.ghost.vx, state.ghost.vy, {
+            color: "rgba(29, 78, 216, 0.28)",
+            width: 4,
+            dashed: true
+          });
+        }
+
+        if (state.mode === "components") {
+          drawComponents();
+        }
+
+        drawVector(state.tail, state.vx, state.vy, { color: "#1d4ed8", width: 4.5 });
+
+        const tip = tipPoint();
+        const hover = state.drag ? state.drag.kind : state.hover;
+        drawHandle(state.tail.x, state.tail.y, "tail", hover === "tail" || hover === "body");
+        drawHandle(tip.x, tip.y, "tip", hover === "tip");
+      }
+
+      // ----- Hit testing -----
+      function dist(ax, ay, bx, by) {
+        return Math.hypot(ax - bx, ay - by);
+      }
+
+      function distToSegment(px, py, x0, y0, x1, y1) {
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const len2 = dx * dx + dy * dy;
+        if (len2 < 1e-6) return dist(px, py, x0, y0);
+        let t = ((px - x0) * dx + (py - y0) * dy) / len2;
+        t = clamp(t, 0, 1);
+        return dist(px, py, x0 + t * dx, y0 + t * dy);
+      }
+
+      function pickHit(sx, sy, items) {
+        let best = null;
+        let bestD = HIT_R;
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          if (it.kind !== "tip") continue;
+          const d = dist(sx, sy, it.x, it.y);
+          if (d <= bestD) {
+            bestD = d;
+            best = it;
+          }
+        }
+        if (best) return { vec: best.vec, kind: "tip", tail: best.tail };
+        bestD = HIT_R;
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          if (it.kind !== "tail") continue;
+          const d = dist(sx, sy, it.x, it.y);
+          if (d <= bestD) {
+            bestD = d;
+            best = it;
+          }
+        }
+        if (best) return { vec: best.vec, kind: "tail", tail: best.tail };
+        bestD = 12;
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          if (it.kind !== "body") continue;
+          const d = distToSegment(sx, sy, it.x0, it.y0, it.x1, it.y1);
+          if (d <= bestD) {
+            bestD = d;
+            best = it;
+          }
+        }
+        if (best) return { vec: best.vec, kind: "body", tail: best.tail };
+        return null;
+      }
+
+      function screenOf(x, y) {
+        return worldToScreen(x, y);
+      }
+
+      function hitItemsForVector(vecId, tail, vx, vy, parts) {
+        const tip = { x: tail.x + vx, y: tail.y + vy };
+        const pTail = screenOf(tail.x, tail.y);
+        const pTip = screenOf(tip.x, tip.y);
+        const items = [];
+        if (!parts || parts.indexOf("tip") >= 0) {
+          items.push({ vec: vecId, kind: "tip", x: pTip.x, y: pTip.y, tail: tail });
+        }
+        if (!parts || parts.indexOf("tail") >= 0) {
+          items.push({ vec: vecId, kind: "tail", x: pTail.x, y: pTail.y, tail: tail });
+        }
+        if (!parts || parts.indexOf("body") >= 0) {
+          items.push({ vec: vecId, kind: "body", x0: pTail.x, y0: pTail.y, x1: pTip.x, y1: pTip.y, tail: tail });
+        }
+        return items;
+      }
+
+      function hitTestPage2(sx, sy) {
+        const A = add.A;
+        const B = add.B;
+        const origin = A.tail;
+        const aTip = { x: origin.x + A.vx, y: origin.y + A.vy };
+        const bOrigin = { x: origin.x + B.vx, y: origin.y + B.vy };
+        let items = [];
+        if (add.mode === "independent") {
+          items = items.concat(hitItemsForVector("A", A.tail, A.vx, A.vy));
+          items = items.concat(hitItemsForVector("B", B.tail, B.vx, B.vy));
+        } else if (add.mode === "swap") {
+          items = items.concat(hitItemsForVector("B0", B.tail, B.vx, B.vy));
+          items = items.concat(hitItemsForVector("B", origin, B.vx, B.vy, ["tip", "body"]));
+          items = items.concat(hitItemsForVector("A", bOrigin, A.vx, A.vy, ["tip", "body"]));
+          items = items.concat(hitItemsForVector("A", origin, A.vx, A.vy, ["tail"]));
+        } else {
+          items = items.concat(hitItemsForVector("B0", B.tail, B.vx, B.vy));
+          items = items.concat(hitItemsForVector("A", origin, A.vx, A.vy));
+          items = items.concat(hitItemsForVector("Bt", aTip, B.vx, B.vy, ["tip", "body"]));
+        }
+        return pickHit(sx, sy, items);
+      }
+
+      function hitTestPage3(sx, sy) {
+        const t = dotp.tail;
+        const items = hitItemsForVector("A", t, dotp.A.vx, dotp.A.vy, ["tip", "body"])
+          .concat(hitItemsForVector("B", t, dotp.B.vx, dotp.B.vy, ["tip", "body"]))
+          .concat(hitItemsForVector("T", t, 0, 0, ["tail"]));
+        const pTail = screenOf(t.x, t.y);
+        items.push({ vec: "T", kind: "tail", x: pTail.x, y: pTail.y, tail: t });
+        return pickHit(sx, sy, items);
+      }
+
+      function hitTest(sx, sy) {
+        if (currentPage === 2) return hitTestPage2(sx, sy);
+        if (currentPage === 3) return hitTestPage3(sx, sy);
+        const tip = tipPoint();
+        const pTail = worldToScreen(state.tail.x, state.tail.y);
+        const pTip = worldToScreen(tip.x, tip.y);
+
+        if (dist(sx, sy, pTip.x, pTip.y) <= HIT_R) return "tip";
+        if (dist(sx, sy, pTail.x, pTail.y) <= HIT_R) return "tail";
+        if (distToSegment(sx, sy, pTail.x, pTail.y, pTip.x, pTip.y) <= 12) return "body";
+        return null;
+      }
+
+      function pointerPos(event) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      }
+
+      // ----- Interaction -----
+      function setCursor(kind) {
+        const k = kind && typeof kind === "object" ? kind.kind : kind;
+        if (k === "tip" || k === "tail" || k === "body") {
+          canvas.style.cursor = state.drag ? "grabbing" : "grab";
+        } else {
+          canvas.style.cursor = "default";
+        }
+      }
+
+      function boundTail(x, y) {
+        const halfX = cssW / (2 * pxPerUnit) - 0.4;
+        const halfY = cssH / (2 * pxPerUnit) - 0.4;
+        return { x: clamp(x, -halfX, halfX), y: clamp(y, -halfY, halfY) };
+      }
+
+      function onPointerDown(event) {
+        const p = pointerPos(event);
+        const kind = hitTest(p.x, p.y);
+        if (!kind) return;
+
+        event.preventDefault();
+        canvas.setPointerCapture(event.pointerId);
+        const world = screenToWorld(p.x, p.y);
+
+        if (currentPage === 2) {
+          const vecKey = kind.vec === "B0" || kind.vec === "Bt" ? "B" : kind.vec;
+          const refTail = kind.tail;
+          const target = vecKey === "A" ? add.A : add.B;
+          const sameTail = Math.abs(refTail.x - target.tail.x) < 1e-9 && Math.abs(refTail.y - target.tail.y) < 1e-9;
+          if (kind.kind === "tip" || (kind.kind === "body" && !sameTail)) {
+            const tip = { x: refTail.x + target.vx, y: refTail.y + target.vy };
+            state.drag = {
+              vec: vecKey,
+              kind: "tip",
+              grabX: world.x - tip.x,
+              grabY: world.y - tip.y,
+              refTail: { x: refTail.x, y: refTail.y }
+            };
+          } else {
+            state.drag = {
+              vec: vecKey,
+              kind: "tail",
+              grabX: world.x - target.tail.x,
+              grabY: world.y - target.tail.y
+            };
+          }
+          add.hover = { vec: kind.vec, kind: kind.kind };
+          setCursor(kind);
+          draw();
+          return;
+        }
+
+        if (currentPage === 3) {
+          if (kind.vec === "T" || kind.kind === "tail") {
+            state.drag = {
+              vec: "T",
+              kind: "tail",
+              grabX: world.x - dotp.tail.x,
+              grabY: world.y - dotp.tail.y
+            };
+          } else {
+            const v = kind.vec === "A" ? dotp.A : dotp.B;
+            const tip = { x: dotp.tail.x + v.vx, y: dotp.tail.y + v.vy };
+            state.drag = {
+              vec: kind.vec,
+              kind: "tip",
+              grabX: world.x - tip.x,
+              grabY: world.y - tip.y
+            };
+          }
+          dotp.hover = kind;
+          setCursor(kind);
+          draw();
+          return;
+        }
+
+        const tip = tipPoint();
+        if (kind === "tip") {
+          state.drag = {
+            kind: "tip",
+            grabX: world.x - tip.x,
+            grabY: world.y - tip.y
+          };
+        } else {
+          // Tail handle or arrow body: move the whole vector.
+          state.drag = {
+            kind: "tail",
+            grabX: world.x - state.tail.x,
+            grabY: world.y - state.tail.y
+          };
+        }
+        setCursor(kind);
+        draw();
+      }
+
+      function onPointerMove(event) {
+        const p = pointerPos(event);
+
+        if (!state.drag) {
+          const hit = hitTest(p.x, p.y);
+          if (currentPage === 2) add.hover = hit;
+          else if (currentPage === 3) dotp.hover = hit;
+          else state.hover = hit;
+          setCursor(hit);
+          draw();
+          return;
+        }
+
+        event.preventDefault();
+        const world = screenToWorld(p.x, p.y);
+
+        if (currentPage === 2) {
+          if (state.drag.kind === "tip") {
+            const t = state.drag.refTail;
+            applyLocksTo(
+              add[state.drag.vec],
+              (world.x - state.drag.grabX) - t.x,
+              (world.y - state.drag.grabY) - t.y
+            );
+          } else {
+            const pos = boundTail(world.x - state.drag.grabX, world.y - state.drag.grabY);
+            add[state.drag.vec].tail.x = pos.x;
+            add[state.drag.vec].tail.y = pos.y;
+          }
+          updateUI();
+          draw();
+          return;
+        }
+
+        if (currentPage === 3) {
+          if (state.drag.kind === "tail") {
+            const pos = boundTail(world.x - state.drag.grabX, world.y - state.drag.grabY);
+            dotp.tail.x = pos.x;
+            dotp.tail.y = pos.y;
+          } else {
+            applyLocksTo(
+              dotp[state.drag.vec],
+              (world.x - state.drag.grabX) - dotp.tail.x,
+              (world.y - state.drag.grabY) - dotp.tail.y
+            );
+          }
+          updateUI();
+          draw();
+          return;
+        }
+
+        if (state.drag.kind === "tip") {
+          // 拖箭头尖：按锁定条件只改模长、只改方向，或两者都改。
+          const vx = (world.x - state.drag.grabX) - state.tail.x;
+          const vy = (world.y - state.drag.grabY) - state.tail.y;
+          constrainComponents(vx, vy);
+        } else {
+          // Translate the whole vector. vx and vy stay exactly the same.
+          const pos = boundTail(world.x - state.drag.grabX, world.y - state.drag.grabY);
+          state.tail.x = pos.x;
+          state.tail.y = pos.y;
+        }
+
+        updateUI();
+        draw();
+      }
+
+      function onPointerUp(event) {
+        if (!state.drag) return;
+        state.drag = null;
+        const p = pointerPos(event);
+        const hit = hitTest(p.x, p.y);
+        if (currentPage === 2) add.hover = hit;
+        else if (currentPage === 3) dotp.hover = hit;
+        else state.hover = hit;
+        setCursor(hit);
+        draw();
+      }
+
+      canvas.addEventListener("pointerdown", onPointerDown);
+      canvas.addEventListener("pointermove", onPointerMove);
+      canvas.addEventListener("pointerup", onPointerUp);
+      canvas.addEventListener("pointercancel", onPointerUp);
+      canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+      // ----- Challenges -----
+      const CHALLENGES = [
+        {
+          text: "画一个大小为 5、指向东方的矢量。",
+          check: function (mag, ang) {
+            return mag >= 2 && near(mag, 5, 0.45) && ang !== null && angleDiff(ang, 0) <= 12;
+          }
+        },
+        {
+          text: "画一个大小约为 6、指向北方的矢量。",
+          check: function (mag, ang) {
+            return near(mag, 6, 0.6) && ang !== null && angleDiff(ang, 90) <= 12;
+          }
+        },
+        {
+          text: "画一个大小为 5、方向为 45° 的矢量。",
+          check: function (mag, ang) {
+            return near(mag, 5, 0.45) && ang !== null && angleDiff(ang, 45) <= 10;
+          }
+        },
+        {
+          text: "画一个 x 分量约为 4 的矢量。",
+          check: function (mag, ang, vx) {
+            return near(vx, 4, 0.45);
+          }
+        },
+        {
+          text: "画一个指向西南的矢量。",
+          check: function (mag, ang) {
+            return mag >= 2 && ang !== null && angleDiff(ang, 225) <= 22;
+          }
+        },
+        {
+          text: "画一个大小在 7 到 8 之间的矢量。",
+          check: function (mag) {
+            return mag >= 6.9 && mag <= 8.1;
+          }
+        },
+        {
+          text: "画一个指向西方的矢量。",
+          check: function (mag, ang) {
+            return mag >= 2 && ang !== null && angleDiff(ang, 180) <= 14;
+          }
+        },
+        {
+          text: "画一个大小约为 4、指向南方的矢量。",
+          check: function (mag, ang) {
+            return near(mag, 4, 0.5) && ang !== null && angleDiff(ang, 270) <= 12;
+          }
+        },
+        {
+          text: "画一个 y 分量约为 3 的矢量。",
+          check: function (mag, ang, vx, vy) {
+            return near(vy, 3, 0.45);
+          }
+        },
+        {
+          text: "画一个指向东南的矢量。",
+          check: function (mag, ang) {
+            return mag >= 2 && ang !== null && angleDiff(ang, 315) <= 22;
+          }
+        }
+      ];
+
+      const ADD_CHALLENGES = [
+        {
+          text: "让 A + B 指向正东。",
+          check: function (A, B, R) {
+            return R.mag >= 2 && R.ang !== null && angleDiff(R.ang, 0) <= 14;
+          }
+        },
+        {
+          text: "让 A + B 几乎为零。",
+          check: function (A, B, R) {
+            return R.mag < 0.85;
+          }
+        },
+        {
+          text: "让合矢量的大小约为 5。",
+          check: function (A, B, R) {
+            return near(R.mag, 5, 0.6);
+          }
+        },
+        {
+          text: "用两个不同的矢量，使它们的和为 ⟨4, 3⟩。",
+          check: function (A, B, R) {
+            return near(R.vx, 4, 0.5) && near(R.vy, 3, 0.5) && A.mag > 0.8 && B.mag > 0.8 &&
+              (Math.abs(A.vx - B.vx) > 0.4 || Math.abs(A.vy - B.vy) > 0.4);
+          }
+        },
+        {
+          text: "让 A 与 B 垂直。",
+          check: function (A, B) {
+            return A.mag > 1.5 && B.mag > 1.5 && Math.abs(A.vx * B.vx + A.vy * B.vy) < 1.2;
+          }
+        },
+        {
+          text: "让 A 与 B 方向相反，使得 A + B = 0。",
+          check: function (A, B, R) {
+            return A.mag > 1.5 && B.mag > 1.5 && R.mag < 0.85;
+          }
+        },
+        {
+          text: "让 A + B 指向正北。",
+          check: function (A, B, R) {
+            return R.mag >= 2 && R.ang !== null && angleDiff(R.ang, 90) <= 14;
+          }
+        },
+        {
+          text: "让合矢量的 x 分量大约为 0。",
+          check: function (A, B, R) {
+            return Math.abs(R.vx) < 0.55 && R.mag > 1.5;
+          }
+        }
+      ];
+
+      const DOT_CHALLENGES = [
+        {
+          text: "让 A · B = 0。",
+          check: function (d) {
+            return d.ma > 1.5 && d.mb > 1.5 && Math.abs(d.dot) < 1.1;
+          }
+        },
+        {
+          text: "让点乘为正。",
+          check: function (d) {
+            return d.dot > 2;
+          }
+        },
+        {
+          text: "让点乘为负。",
+          check: function (d) {
+            return d.dot < -2;
+          }
+        },
+        {
+          text: "让 A 与 B 垂直。",
+          check: function (d) {
+            return d.ma > 1.5 && d.mb > 1.5 && d.th !== null && Math.abs(d.th - 90) <= 12;
+          }
+        },
+        {
+          text: "让 A 与 B 指向同一方向。",
+          check: function (d) {
+            return d.ma > 1.5 && d.mb > 1.5 && d.th !== null && d.th <= 14;
+          }
+        },
+        {
+          text: "让 A 与 B 指向相反方向。",
+          check: function (d) {
+            return d.ma > 1.5 && d.mb > 1.5 && d.th !== null && d.th >= 166;
+          }
+        },
+        {
+          text: "让 A · B 大约等于 10。",
+          check: function (d) {
+            return near(d.dot, 10, 1.3);
+          }
+        },
+        {
+          text: "保持夹角大致不变，改变点乘的大小。",
+          start: function (d) {
+            return { th: d.th, dot: d.dot };
+          },
+          check: function (d, snap) {
+            if (!snap || snap.th === null || d.th === null) return false;
+            return Math.abs(d.th - snap.th) <= 10 && Math.abs(d.dot - snap.dot) >= 3;
+          }
+        },
+        {
+          text: "保持 |A| 和 |B| 大致不变，让点乘为零。",
+          start: function (d) {
+            return { ma: d.ma, mb: d.mb };
+          },
+          check: function (d, snap) {
+            if (!snap) return false;
+            return near(d.ma, snap.ma, 0.55) && near(d.mb, snap.mb, 0.55) &&
+              d.ma > 1.5 && d.mb > 1.5 && Math.abs(d.dot) < 1.2;
+          }
+        }
+      ];
+
+      function addStats() {
+        const A = add.A;
+        const B = add.B;
+        return {
+          A: { vx: A.vx, vy: A.vy, mag: calculateMagnitude(A.vx, A.vy), ang: calculateAngle(A.vx, A.vy) },
+          B: { vx: B.vx, vy: B.vy, mag: calculateMagnitude(B.vx, B.vy), ang: calculateAngle(B.vx, B.vy) },
+          R: {
+            vx: A.vx + B.vx,
+            vy: A.vy + B.vy,
+            mag: calculateMagnitude(A.vx + B.vx, A.vy + B.vy),
+            ang: calculateAngle(A.vx + B.vx, A.vy + B.vy)
+          }
+        };
+      }
+
+      function dotStats() {
+        const ax = dotp.A.vx;
+        const ay = dotp.A.vy;
+        const bx = dotp.B.vx;
+        const by = dotp.B.vy;
+        const ma = calculateMagnitude(ax, ay);
+        const mb = calculateMagnitude(bx, by);
+        const dot = calculateDotProduct(ax, ay, bx, by);
+        const th = calculateVectorAngle(ax, ay, bx, by);
+        const proj = calculateProjection(ax, ay, bx, by);
+        const cos = (ma < MIN_MAG || mb < MIN_MAG) ? null : clamp(dot / (ma * mb), -1, 1);
+        return { ax: ax, ay: ay, bx: bx, by: by, ma: ma, mb: mb, dot: dot, th: th, proj: proj, cos: cos };
+      }
+
+      function checkChallenge() {
+        if (currentPage === 2) {
+          if (!add.challenge) return false;
+          const s = addStats();
+          return add.challenge.check(s.A, s.B, s.R);
+        }
+        if (currentPage === 3) {
+          if (!dotp.challenge) return false;
+          return dotp.challenge.check(dotStats(), dotp.snap);
+        }
+        const ch = state.challenge;
+        if (!ch) return false;
+        const mag = calculateMagnitude(state.vx, state.vy);
+        const ang = calculateAngle(state.vx, state.vy);
+        return ch.check(mag, ang, state.vx, state.vy);
+      }
+
+      function pickChallenge(list, current) {
+        const pool = list.filter(function (c) { return c.text !== current; });
+        return pool[Math.floor(Math.random() * pool.length)] || list[0];
+      }
+
+      function newChallenge() {
+        if (currentPage === 2) {
+          const pick = pickChallenge(ADD_CHALLENGES, add.challenge && add.challenge.text);
+          add.challenge = pick;
+          add.snap = pick.start ? pick.start(addStats()) : null;
+          challengeText.textContent = pick.text;
+          updateUI();
+          return;
+        }
+        if (currentPage === 3) {
+          const pick = pickChallenge(DOT_CHALLENGES, dotp.challenge && dotp.challenge.text);
+          dotp.challenge = pick;
+          dotp.snap = pick.start ? pick.start(dotStats()) : null;
+          challengeText.textContent = pick.text;
+          updateUI();
+          return;
+        }
+        const current = state.challenge && state.challenge.text;
+        const pool = CHALLENGES.filter(function (c) { return c.text !== current; });
+        const pick = pool[Math.floor(Math.random() * pool.length)] || CHALLENGES[0];
+        state.challenge = pick;
+        challengeText.textContent = pick.text;
+        updateUI();
+      }
+
+      // ----- UI / modes -----
+      function setMode(mode) {
+        state.mode = mode;
+        Object.keys(modeButtons).forEach(function (key) {
+          modeButtons[key].classList.toggle("active", key === mode);
+        });
+
+        if (mode === "move") {
+          state.ghost = {
+            tail: { x: state.tail.x, y: state.tail.y },
+            vx: state.vx,
+            vy: state.vy
+          };
+        } else {
+          state.ghost = null;
+        }
+
+        instructionEl.textContent = TEXT[mode];
+        if (currentPage === 1) {
+          updateUI();
+          draw();
+        }
+      }
+
+      function sameAsGhost() {
+        if (!state.ghost) return false;
+        const mag = calculateMagnitude(state.vx, state.vy);
+        const gMag = calculateMagnitude(state.ghost.vx, state.ghost.vy);
+        const ang = calculateAngle(state.vx, state.vy);
+        const gAng = calculateAngle(state.ghost.vx, state.ghost.vy);
+        if (ang === null || gAng === null) return false;
+        return near(mag, gMag, 0.35) && angleDiff(ang, gAng) <= 8;
+      }
+
+      function setInputValue(el, text) {
+        if (document.activeElement === el) return;
+        if (el.value !== text) el.value = text;
+      }
+
+      function syncEditor(vec, rootId) {
+        const root = document.getElementById(rootId);
+        if (!root || !vec) return;
+        const mag = calculateMagnitude(vec.vx, vec.vy);
+        const ang = calculateAngle(vec.vx, vec.vy);
+        const magEl = root.querySelector('[data-k="mag"]');
+        const angEl = root.querySelector('[data-k="ang"]');
+        const vxEl = root.querySelector('[data-k="vx"]');
+        const vyEl = root.querySelector('[data-k="vy"]');
+        if (magEl) setInputValue(magEl, format(mag, 2));
+        if (angEl) setInputValue(angEl, ang === null ? "" : format(ang, 1));
+        if (vxEl) setInputValue(vxEl, format(vec.vx, 2));
+        if (vyEl) setInputValue(vyEl, format(vec.vy, 2));
+        if (magEl && !magEl.readOnly) magEl.disabled = !!vec.lockMag;
+        if (angEl && !angEl.readOnly) angEl.disabled = !!vec.lockAng;
+        const lm = root.querySelector('[data-lock="mag"]');
+        const la = root.querySelector('[data-lock="ang"]');
+        if (lm) lm.setAttribute("aria-pressed", vec.lockMag ? "true" : "false");
+        if (la) la.setAttribute("aria-pressed", vec.lockAng ? "true" : "false");
+        const polar = vec.rep !== "xy";
+        const polarRows = root.querySelectorAll(".row-polar");
+        const xyRows = root.querySelectorAll(".row-xy");
+        for (let i = 0; i < polarRows.length; i++) polarRows[i].classList.toggle("hidden", !polar);
+        for (let i = 0; i < xyRows.length; i++) xyRows[i].classList.toggle("hidden", polar);
+        const btn = root.querySelector(".rep-btn");
+        if (btn) btn.textContent = polar ? "坐标表示" : "大小·方向";
+      }
+
+      function applyVecField(vec, kind, raw, restoreIfInvalid) {
+        const n = parseNum(raw);
+        if (!isFinite(n)) {
+          if (restoreIfInvalid) updateUI();
+          return;
+        }
+        if (kind === "mag") {
+          if (vec.lockMag) {
+            if (restoreIfInvalid) updateUI();
+            return;
+          }
+          let ang = vec.lockAng ? vec.lockedAng : calculateAngle(vec.vx, vec.vy);
+          if (ang === null) ang = 0;
+          setPolarOn(vec, n, ang);
+        } else if (kind === "ang") {
+          if (vec.lockAng) {
+            if (restoreIfInvalid) updateUI();
+            return;
+          }
+          let mag = vec.lockMag ? vec.lockedMag : calculateMagnitude(vec.vx, vec.vy);
+          if (mag < MIN_MAG) mag = 5;
+          setPolarOn(vec, mag, n);
+        } else if (kind === "vx") {
+          applyLocksTo(vec, n, vec.vy);
+        } else if (kind === "vy") {
+          applyLocksTo(vec, vec.vx, n);
+        }
+        updateUI();
+        draw();
+      }
+
+      function bindEditor(rootId, getVec, options) {
+        const root = document.getElementById(rootId);
+        const opts = options || {};
+        if (!root) return;
+        ["mag", "ang", "vx", "vy"].forEach(function (kind) {
+          const el = root.querySelector('[data-k="' + kind + '"]');
+          if (!el || el.readOnly) return;
+          el.addEventListener("input", function () {
+            if (looksComplete(el.value)) applyVecField(getVec(), kind, el.value, false);
+          });
+          el.addEventListener("change", function () {
+            applyVecField(getVec(), kind, el.value, true);
+          });
+          el.addEventListener("blur", function () {
+            applyVecField(getVec(), kind, el.value, true);
+          });
+          el.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+              applyVecField(getVec(), kind, el.value, true);
+              el.blur();
+            }
+          });
+        });
+        const lm = root.querySelector('[data-lock="mag"]');
+        const la = root.querySelector('[data-lock="ang"]');
+        if (lm) {
+          lm.addEventListener("click", function () {
+            toggleLockOn(getVec(), "mag");
+            updateUI();
+            draw();
+          });
+        }
+        if (la) {
+          la.addEventListener("click", function () {
+            toggleLockOn(getVec(), "ang");
+            updateUI();
+            draw();
+          });
+        }
+        const btn = root.querySelector(".rep-btn");
+        if (btn) {
+          btn.addEventListener("click", function () {
+            if (opts.toggleRep) opts.toggleRep();
+            else {
+              const v = getVec();
+              v.rep = v.rep === "xy" ? "polar" : "xy";
+            }
+            updateUI();
+          });
+        }
+      }
+
+      function updatePage1UI() {
+        instructionEl.textContent = TEXT[state.mode];
+        syncEditor(state, "ed-p1");
+        const mag = calculateMagnitude(state.vx, state.vy);
+        const ang = calculateAngle(state.vx, state.vy);
+        const showComp = state.mode === "components";
+        formulaEl.classList.toggle("hidden", !showComp);
+
+        if (showComp) {
+          if (ang !== null) {
+            formulaLive.innerHTML =
+              '<span class="vx">v<sub>x</sub></span> = ' + format(mag, 2) + " × cos(" + format(ang, 1) + "°) = " + format(state.vx, 2) +
+              "<br>" +
+              '<span class="vy">v<sub>y</sub></span> = ' + format(mag, 2) + " × sin(" + format(ang, 1) + "°) = " + format(state.vy, 2);
+          } else {
+            formulaLive.textContent = "大小接近 0 时，方向没有意义。";
+          }
+        }
+
+        let message = "";
+        if (state.mode === "move" && sameAsGhost()) {
+          message = "还是同一个矢量！";
+        }
+        if (state.challenge && checkChallenge()) {
+          message = message ? message + "  正确！" : "正确！";
+        }
+
+        statusEl.textContent = message;
+        statusEl.classList.toggle("visible", !!message);
+      }
+
+      function setPlain(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+
+      function updatePage2UI() {
+        const s = addStats();
+        syncEditor(add.A, "ed-p2a");
+        syncEditor(add.B, "ed-p2b");
+        syncEditor({ vx: s.R.vx, vy: s.R.vy, rep: add.repR }, "p2-r-card");
+
+        const showR = add.mode !== "independent";
+        document.getElementById("p2-r-card").classList.toggle("hidden", !showR);
+
+        const eq = document.getElementById("p2-eq");
+        if (add.mode === "swap") {
+          eq.innerHTML =
+            "<div class=\"eq-line\"><strong>A + B = B + A</strong></div>" +
+            "<div class=\"live\">R = ⟨" + format(s.R.vx, 2) + ", " + format(s.R.vy, 2) + "⟩</div>";
+        } else if (add.mode === "components") {
+          eq.innerHTML =
+            "<div class=\"eq-line\">A = ⟨" + format(s.A.vx, 2) + ", " + format(s.A.vy, 2) + "⟩</div>" +
+            "<div class=\"eq-line\">B = ⟨" + format(s.B.vx, 2) + ", " + format(s.B.vy, 2) + "⟩</div>" +
+            "<div class=\"eq-line\">R<sub>x</sub> = A<sub>x</sub> + B<sub>x</sub> = " + format(s.A.vx, 2) + " + " + format(s.B.vx, 2) + " = " + format(s.R.vx, 2) + "</div>" +
+            "<div class=\"eq-line\">R<sub>y</sub> = A<sub>y</sub> + B<sub>y</sub> = " + format(s.A.vy, 2) + " + " + format(s.B.vy, 2) + " = " + format(s.R.vy, 2) + "</div>" +
+            "<div class=\"eq-line\"><strong>R = ⟨" + format(s.R.vx, 2) + ", " + format(s.R.vy, 2) + "⟩</strong></div>";
+        } else if (showR) {
+          eq.innerHTML =
+            "<div class=\"eq-line\"><strong>A + B = R</strong></div>" +
+            "<div class=\"live\">R = ⟨" + format(s.R.vx, 2) + ", " + format(s.R.vy, 2) + "⟩</div>";
+        }
+
+        instructionEl.textContent = ADD_TEXT[add.mode];
+        const message = add.challenge && checkChallenge() ? "正确！" : "";
+        statusEl.textContent = message;
+        statusEl.classList.toggle("visible", !!message);
+      }
+
+      function updatePage3UI() {
+        const d = dotStats();
+        syncEditor(dotp.A, "ed-p3a");
+        syncEditor(dotp.B, "ed-p3b");
+        setPlain("p3-th", d.th === null ? "—" : format(d.th, 1) + "°");
+        setPlain("p3-cos", d.cos === null ? "—" : format(d.cos, 2));
+
+        const showCos = dotp.mode === "build" || dotp.mode === "components";
+        document.getElementById("p3-cos-label").classList.toggle("hidden", !showCos);
+        document.getElementById("p3-cos").classList.toggle("hidden", !showCos);
+
+        const showProj = dotp.mode !== "angle";
+        document.getElementById("p3-proj-card").classList.toggle("hidden", !showProj);
+        const projEl = document.getElementById("p3-proj-eq");
+        if (showProj) {
+          if (!d.proj || d.th === null) {
+            projEl.textContent = "A 太短时，投影没有意义。";
+          } else {
+            projEl.innerHTML =
+              "投影长度 = |B| cos(θ) = " + format(d.mb, 2) + " × " + format(d.cos, 2) + " = " + format(d.proj.length, 2);
+          }
+        }
+
+        const showDot = dotp.mode === "build" || dotp.mode === "components";
+        document.getElementById("p3-dot-card").classList.toggle("hidden", !showDot);
+        const body = document.getElementById("p3-dot-body");
+        if (showDot) {
+          const projLen = d.proj ? d.proj.length : 0;
+          let html = "";
+          if (dotp.mode === "build") {
+            html += "<div class=\"eq-line\">A · B = |A| ×（B 在 A 上的投影）</div>";
+            html += "<div class=\"eq-line\">投影 = |B| cos(θ)</div>";
+            html += "<div class=\"eq-line\">所以 A · B = |A||B|cos(θ)</div>";
+            if (d.th !== null) {
+              html += "<div class=\"live eq-line\">投影 = " + format(d.mb, 2) + " cos(" + format(d.th, 1) + "°) = " + format(projLen, 2) + "</div>";
+              html += "<div class=\"eq-line\"><strong>A · B = " + format(d.ma, 2) + " × " + format(projLen, 2) + " = " + format(d.dot, 2) + "</strong></div>";
+            }
+          } else {
+            html += "<div class=\"split\">";
+            html += "<div><div class=\"eq-line\">几何</div>";
+            html += "<div class=\"eq-line\">A · B = |A||B|cosθ</div>";
+            if (d.th !== null) {
+              html += "<div class=\"live eq-line\">= " + format(d.ma, 2) + " × " + format(d.mb, 2) + " × " + format(d.cos, 2) + "</div>";
+            }
+            html += "<div class=\"eq-line\"><strong>= " + format(d.dot, 2) + "</strong></div></div>";
+            html += "<div><div class=\"eq-line\">分量</div>";
+            html += "<div class=\"eq-line\">A = ⟨" + format(d.ax, 2) + ", " + format(d.ay, 2) + "⟩</div>";
+            html += "<div class=\"eq-line\">B = ⟨" + format(d.bx, 2) + ", " + format(d.by, 2) + "⟩</div>";
+            html += "<div class=\"eq-line\">A · B = A<sub>x</sub>B<sub>x</sub> + A<sub>y</sub>B<sub>y</sub></div>";
+            html += "<div class=\"live eq-line\">= (" + format(d.ax, 2) + ")(" + format(d.bx, 2) + ") + (" + format(d.ay, 2) + ")(" + format(d.by, 2) + ")</div>";
+            html += "<div class=\"eq-line\"><strong>= " + format(d.dot, 2) + "</strong></div></div></div>";
+          }
+          body.innerHTML = html;
+        }
+
+        const sign = document.getElementById("p3-sign");
+        const showSign = dotp.mode !== "angle" && d.th !== null;
+        sign.classList.toggle("hidden", !showSign);
+        sign.classList.remove("pos", "zero", "neg");
+        if (showSign) {
+          if (Math.abs(d.th - 90) <= 8) {
+            sign.textContent = "垂直 → 点乘为零";
+            sign.classList.add("sign-card", "zero");
+          } else if (d.th < 90) {
+            sign.textContent = "大致同向 → 点乘为正";
+            sign.classList.add("sign-card", "pos");
+          } else {
+            sign.textContent = "大致反向 → 点乘为负";
+            sign.classList.add("sign-card", "neg");
+          }
+        }
+
+        instructionEl.textContent = DOT_TEXT[dotp.mode];
+        const message = dotp.challenge && checkChallenge() ? "正确！" : "";
+        statusEl.textContent = message;
+        statusEl.classList.toggle("visible", !!message);
+      }
+
+      function updateUI() {
+        if (currentPage === 2) {
+          updatePage2UI();
+          return;
+        }
+        if (currentPage === 3) {
+          updatePage3UI();
+          return;
+        }
+        updatePage1UI();
+      }
+
+      function resetVector() {
+        state.tail = { x: 0, y: 0 };
+        state.vx = 4;
+        state.vy = 3;
+        if (state.lockMag) state.lockedMag = 5;
+        if (state.lockAng) state.lockedAng = calculateAngle(4, 3);
+        updateUI();
+        draw();
+      }
+
+      function applyField(kind, raw, restoreIfInvalid) {
+        applyVecField(state, kind, raw, restoreIfInvalid);
+      }
+
+      bindEditor("ed-p1", function () { return state; });
+      bindEditor("ed-p2a", function () { return add.A; });
+      bindEditor("ed-p2b", function () { return add.B; });
+      bindEditor("p2-r-card", function () {
+        return { vx: add.A.vx + add.B.vx, vy: add.A.vy + add.B.vy, rep: add.repR };
+      }, {
+        toggleRep: function () {
+          add.repR = add.repR === "xy" ? "polar" : "xy";
+        }
+      });
+      bindEditor("ed-p3a", function () { return dotp.A; });
+      bindEditor("ed-p3b", function () { return dotp.B; });
+
+      function toggleLockMag() {
+        toggleLockOn(state, "mag");
+        updateUI();
+        draw();
+      }
+
+      function toggleLockAng() {
+        toggleLockOn(state, "ang");
+        updateUI();
+        draw();
+      }
+
+      function resetAdd() {
+        add.A.tail = { x: -3, y: -1 };
+        add.A.vx = 4;
+        add.A.vy = 1;
+        add.B.tail = { x: 1, y: -2 };
+        add.B.vx = 1;
+        add.B.vy = 3;
+        if (add.A.lockMag) add.A.lockedMag = Math.hypot(4, 1);
+        if (add.A.lockAng) add.A.lockedAng = Math.atan2(1, 4) * 180 / Math.PI;
+        if (add.B.lockMag) add.B.lockedMag = Math.hypot(1, 3);
+        if (add.B.lockAng) add.B.lockedAng = Math.atan2(3, 1) * 180 / Math.PI;
+        updateUI();
+        draw();
+      }
+
+      function resetDot() {
+        dotp.tail = { x: 0, y: 0 };
+        dotp.A.vx = 5;
+        dotp.A.vy = 0;
+        dotp.B.vx = 3;
+        dotp.B.vy = 4;
+        if (dotp.A.lockMag) dotp.A.lockedMag = 5;
+        if (dotp.A.lockAng) dotp.A.lockedAng = 0;
+        if (dotp.B.lockMag) dotp.B.lockedMag = 5;
+        if (dotp.B.lockAng) dotp.B.lockedAng = Math.atan2(4, 3) * 180 / Math.PI;
+        updateUI();
+        draw();
+      }
+
+      function setAddMode(mode) {
+        add.mode = mode;
+        const map = {
+          independent: "add-independent",
+          head: "add-head",
+          swap: "add-swap",
+          components: "add-comp"
+        };
+        Object.keys(map).forEach(function (key) {
+          document.getElementById(map[key]).classList.toggle("active", key === mode);
+        });
+        updateUI();
+        draw();
+      }
+
+      function setDotMode(mode) {
+        dotp.mode = mode;
+        const map = {
+          angle: "dot-angle",
+          projection: "dot-proj",
+          build: "dot-build",
+          components: "dot-comp"
+        };
+        Object.keys(map).forEach(function (key) {
+          document.getElementById(map[key]).classList.toggle("active", key === mode);
+        });
+        updateUI();
+        draw();
+      }
+
+      function syncChallengeLabel() {
+        if (currentPage === 2) {
+          challengeText.textContent = add.challenge ? add.challenge.text : "点击「新挑战」开始练习。";
+        } else if (currentPage === 3) {
+          challengeText.textContent = dotp.challenge ? dotp.challenge.text : "点击「新挑战」开始练习。";
+        } else {
+          challengeText.textContent = state.challenge ? state.challenge.text : "点击「新挑战」开始练习。";
+        }
+      }
+
+      function selectPage(n) {
+        currentPage = n;
+        state.drag = null;
+        document.getElementById("page-1").classList.toggle("active", n === 1);
+        document.getElementById("page-2").classList.toggle("active", n === 2);
+        document.getElementById("page-3").classList.toggle("active", n === 3);
+        document.getElementById("toolbar-p1").classList.toggle("hidden", n !== 1);
+        document.getElementById("toolbar-p2").classList.toggle("hidden", n !== 2);
+        document.getElementById("toolbar-p3").classList.toggle("hidden", n !== 3);
+        document.getElementById("panel-p1").classList.toggle("hidden", n !== 1);
+        document.getElementById("panel-p2").classList.toggle("hidden", n !== 2);
+        document.getElementById("panel-p3").classList.toggle("hidden", n !== 3);
+        document.getElementById("subtitle").textContent = PAGE_SUB[n];
+        document.getElementById("page-hint").textContent = PAGE_HINT[n];
+        syncChallengeLabel();
+        updateUI();
+        draw();
+      }
+
+      function resetCurrent() {
+        if (currentPage === 2) resetAdd();
+        else if (currentPage === 3) resetDot();
+        else resetVector();
+      }
+
+      modeButtons.magnitude.addEventListener("click", function () { setMode("magnitude"); });
+      modeButtons.move.addEventListener("click", function () { setMode("move"); });
+      modeButtons.components.addEventListener("click", function () { setMode("components"); });
+      document.getElementById("reset-btn").addEventListener("click", resetVector);
+      document.getElementById("reset-add").addEventListener("click", resetAdd);
+      document.getElementById("reset-dot").addEventListener("click", resetDot);
+      document.getElementById("challenge-btn").addEventListener("click", newChallenge);
+      document.getElementById("page-1").addEventListener("click", function () { selectPage(1); });
+      document.getElementById("page-2").addEventListener("click", function () { selectPage(2); });
+      document.getElementById("page-3").addEventListener("click", function () { selectPage(3); });
+      document.getElementById("add-independent").addEventListener("click", function () { setAddMode("independent"); });
+      document.getElementById("add-head").addEventListener("click", function () { setAddMode("head"); });
+      document.getElementById("add-swap").addEventListener("click", function () { setAddMode("swap"); });
+      document.getElementById("add-comp").addEventListener("click", function () { setAddMode("components"); });
+      document.getElementById("dot-angle").addEventListener("click", function () { setDotMode("angle"); });
+      document.getElementById("dot-proj").addEventListener("click", function () { setDotMode("projection"); });
+      document.getElementById("dot-build").addEventListener("click", function () { setDotMode("build"); });
+      document.getElementById("dot-comp").addEventListener("click", function () { setDotMode("components"); });
+
+      // ----- Layout -----
+      function resizeCanvas() {
+        const rect = stage.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        cssW = Math.max(1, rect.width);
+        cssH = Math.max(1, rect.height);
+        canvas.width = Math.floor(cssW * dpr);
+        canvas.height = Math.floor(cssH * dpr);
+        canvas.style.width = cssW + "px";
+        canvas.style.height = cssH + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        originX = cssW / 2;
+        originY = cssH / 2;
+        pxPerUnit = Math.min(cssW, cssH) / 18;
+        draw();
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      if (window.ResizeObserver) {
+        new ResizeObserver(resizeCanvas).observe(stage);
+      }
+
+      setMode("magnitude");
+      resizeCanvas();
+      updateUI();
+    })();
+  </script>
+</body>
+</html>
