@@ -162,6 +162,36 @@
 
     .btn-primary:hover { filter: brightness(1.05); }
 
+    .lang-btn {
+      display: inline-flex;
+      align-items: stretch;
+      border: 1px solid var(--line);
+      background: #f7f8fa;
+      border-radius: 8px;
+      overflow: hidden;
+      padding: 0;
+      cursor: pointer;
+      font: 650 0.82rem var(--font);
+      color: var(--ink);
+      flex: 0 0 auto;
+    }
+
+    .lang-btn:hover { background: #eef2f7; }
+
+    .lang-btn .lang-zh,
+    .lang-btn .lang-en {
+      padding: 8px 10px;
+      color: var(--muted);
+      min-width: 2.1em;
+      text-align: center;
+    }
+
+    .lang-btn[data-lang="zh"] .lang-zh,
+    .lang-btn[data-lang="en"] .lang-en {
+      background: #0f172a;
+      color: #fff;
+    }
+
     main {
       flex: 1 1 auto;
       display: flex;
@@ -469,48 +499,52 @@
 <body>
   <header>
     <div class="brand">
-      <h1>矢量画板</h1>
+      <h1 data-i18n="title">矢量画板</h1>
       <p class="subtitle" id="subtitle">矢量是既有大小、又有方向的物理量。</p>
     </div>
     <div class="header-controls">
-      <div class="pages" role="tablist" aria-label="学习页面">
-        <button id="page-1" class="active" type="button">1 基础</button>
-        <button id="page-2" type="button">2 矢量加法</button>
-        <button id="page-3" type="button">3 点乘</button>
+      <button id="lang-toggle" class="lang-btn" type="button" data-lang="zh" data-i18n-aria="langAria" aria-label="切换中文 / English">
+        <span class="lang-zh">中</span>
+        <span class="lang-en">EN</span>
+      </button>
+      <div class="pages" role="tablist" data-i18n-aria="pagesAria" aria-label="学习页面">
+        <button id="page-1" class="active" type="button" data-i18n="page1">1 基础</button>
+        <button id="page-2" type="button" data-i18n="page2">2 矢量加法</button>
+        <button id="page-3" type="button" data-i18n="page3">3 点乘</button>
       </div>
       <div class="toolbar" id="toolbar-p1">
-        <div class="modes" role="tablist" aria-label="学习模式">
-          <button id="mode-magnitude" class="active" type="button">大小与方向</button>
-          <button id="mode-move" type="button">平移矢量</button>
-          <button id="mode-components" type="button">正交分解</button>
+        <div class="modes" role="tablist" data-i18n-aria="modeAria" aria-label="学习模式">
+          <button id="mode-magnitude" class="active" type="button" data-i18n="magDir">大小与方向</button>
+          <button id="mode-move" type="button" data-i18n="moveVec">平移矢量</button>
+          <button id="mode-components" type="button" data-i18n="ortho">正交分解</button>
         </div>
-        <button id="reset-btn" class="btn" type="button">重置矢量</button>
+        <button id="reset-btn" class="btn" type="button" data-i18n="reset">重置矢量</button>
       </div>
       <div class="toolbar hidden" id="toolbar-p2">
-        <div class="modes" role="tablist" aria-label="加法模式">
-          <button id="add-independent" class="active" type="button">两个矢量</button>
-          <button id="add-head" type="button">首尾相接</button>
-          <button id="add-swap" type="button">交换 A 和 B</button>
-          <button id="add-comp" type="button">显示分量</button>
+        <div class="modes" role="tablist" data-i18n-aria="addAria" aria-label="加法模式">
+          <button id="add-independent" class="active" type="button" data-i18n="twoVec">两个矢量</button>
+          <button id="add-head" type="button" data-i18n="headTail">首尾相接</button>
+          <button id="add-swap" type="button" data-i18n="swapAB">交换 A 和 B</button>
+          <button id="add-comp" type="button" data-i18n="showComp">显示分量</button>
         </div>
-        <button id="reset-add" class="btn" type="button">重置矢量</button>
+        <button id="reset-add" class="btn" type="button" data-i18n="reset">重置矢量</button>
       </div>
       <div class="toolbar hidden" id="toolbar-p3">
-        <div class="modes" role="tablist" aria-label="点乘模式">
-          <button id="dot-angle" class="active" type="button">相对方向</button>
-          <button id="dot-proj" type="button">显示投影</button>
-          <button id="dot-build" type="button">构成点乘</button>
-          <button id="dot-comp" type="button">分量公式</button>
+        <div class="modes" role="tablist" data-i18n-aria="dotAria" aria-label="点乘模式">
+          <button id="dot-angle" class="active" type="button" data-i18n="relDir">相对方向</button>
+          <button id="dot-proj" type="button" data-i18n="showProj">显示投影</button>
+          <button id="dot-build" type="button" data-i18n="buildDot">构成点乘</button>
+          <button id="dot-comp" type="button" data-i18n="compFormula">分量公式</button>
         </div>
-        <button id="reset-dot" class="btn" type="button">重置矢量</button>
+        <button id="reset-dot" class="btn" type="button" data-i18n="reset">重置矢量</button>
       </div>
     </div>
   </header>
 
   <main>
     <div class="stage" id="stage">
-      <canvas id="plane" aria-label="带可拖动矢量的坐标平面"></canvas>
-      <div class="scale-note">网格：每格 = 1 个单位</div>
+      <canvas id="plane" data-i18n-aria="canvasAria" aria-label="带可拖动矢量的坐标平面"></canvas>
+      <div class="scale-note" data-i18n="gridNote">网格：每格 = 1 个单位</div>
     </div>
 
     <aside>
@@ -520,42 +554,42 @@
       <div id="panel-p1">
       <div class="card" id="ed-p1">
         <div class="vec-head">
-          <h2>当前矢量</h2>
-          <button type="button" class="rep-btn">坐标表示</button>
+          <h2 data-i18n="currentVec">当前矢量</h2>
+          <button type="button" class="rep-btn" data-i18n="asXY">坐标表示</button>
         </div>
-        <p class="fill-hint">可拖动或填写。锁定后，拖箭头时该项保持不变。</p>
+        <p class="fill-hint" data-i18n="fillHint">可拖动或填写。锁定后，拖箭头时该项保持不变。</p>
         <dl class="readout">
-          <dt class="row-polar">大小</dt>
+          <dt class="row-polar" data-i18n="mag">大小</dt>
           <dd class="row-polar">
-            <input id="in-mag" data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="大小" value="5.00" />
+            <input id="in-mag" data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="大小" data-i18n-label="mag" value="5.00" />
           </dd>
-          <dt class="row-polar">方向</dt>
+          <dt class="row-polar" data-i18n="dir">方向</dt>
           <dd class="row-polar">
-            <input id="in-ang" data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="方向" value="36.9" />
+            <input id="in-ang" data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="方向" data-i18n-label="dir" value="36.9" />
             <span class="unit">°</span>
           </dd>
-          <dt class="row-xy hidden">x 分量</dt>
+          <dt class="row-xy hidden" data-i18n="vx">x 分量</dt>
           <dd class="row-xy hidden">
-            <input id="in-vx" data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="x 分量" value="4.00" />
+            <input id="in-vx" data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="x 分量" data-i18n-label="vx" value="4.00" />
           </dd>
-          <dt class="row-xy hidden">y 分量</dt>
+          <dt class="row-xy hidden" data-i18n="vy">y 分量</dt>
           <dd class="row-xy hidden">
-            <input id="in-vy" data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="y 分量" value="3.00" />
+            <input id="in-vy" data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="y 分量" data-i18n-label="vy" value="3.00" />
           </dd>
         </dl>
         <div class="lock-bar">
-          <button type="button" class="lock-btn" id="lock-mag" data-lock="mag" aria-pressed="false" title="锁定模长：拖动时大小不变，只能改变方向">
+          <button type="button" class="lock-btn" id="lock-mag" data-lock="mag" aria-pressed="false" data-i18n-title="lockMagTitle" title="锁定模长：拖动时大小不变，只能改变方向">
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>
-            锁模长
+            <span data-i18n="lockMag">锁模长</span>
           </button>
-          <button type="button" class="lock-btn" id="lock-ang" data-lock="ang" aria-pressed="false" title="锁定角度：拖动时方向不变，只能改变长短">
+          <button type="button" class="lock-btn" id="lock-ang" data-lock="ang" aria-pressed="false" data-i18n-title="lockAngTitle" title="锁定角度：拖动时方向不变，只能改变长短">
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>
-            锁角度
+            <span data-i18n="lockAng">锁角度</span>
           </button>
         </div>
         <div class="formula hidden" id="formula">
-          <div><span class="vx">v<sub>x</sub></span> = 大小 × cos(θ)</div>
-          <div><span class="vy">v<sub>y</sub></span> = 大小 × sin(θ)</div>
+          <div><span class="vx">v<sub>x</sub></span> = <span data-i18n="wordMag">大小</span> × cos(θ)</div>
+          <div><span class="vy">v<sub>y</sub></span> = <span data-i18n="wordMag">大小</span> × sin(θ)</div>
           <div class="live" id="formula-live"></div>
         </div>
       </div>
@@ -564,67 +598,67 @@
       <div id="panel-p2" class="hidden">
         <div class="card" id="ed-p2a">
           <div class="vec-head">
-            <h2 class="vec-a">矢量 A</h2>
-            <button type="button" class="rep-btn">坐标表示</button>
+            <h2 class="vec-a" data-i18n="vecA">矢量 A</h2>
+            <button type="button" class="rep-btn" data-i18n="asXY">坐标表示</button>
           </div>
           <dl class="readout">
-            <dt class="row-polar">大小</dt>
+            <dt class="row-polar" data-i18n="mag">大小</dt>
             <dd class="row-polar">
-              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="A 大小" value="4.12" />
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="A 大小" data-i18n-label="magAInput" value="4.12" />
             </dd>
-            <dt class="row-polar">方向</dt>
+            <dt class="row-polar" data-i18n="dir">方向</dt>
             <dd class="row-polar">
-              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="A 方向" value="14.0" />
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="A 方向" data-i18n-label="dirAInput" value="14.0" />
               <span class="unit">°</span>
             </dd>
-            <dt class="row-xy hidden">x 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vx">x 分量</dt>
             <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Ax" value="4.00" /></dd>
-            <dt class="row-xy hidden">y 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vy">y 分量</dt>
             <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="Ay" value="1.00" /></dd>
           </dl>
           <div class="lock-bar">
-            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
-            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长" data-i18n-title="lockMagShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockMag">锁模长</span></button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度" data-i18n-title="lockAngShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockAng">锁角度</span></button>
           </div>
         </div>
         <div class="card" id="ed-p2b">
           <div class="vec-head">
-            <h2 class="vec-b">矢量 B</h2>
-            <button type="button" class="rep-btn">坐标表示</button>
+            <h2 class="vec-b" data-i18n="vecB">矢量 B</h2>
+            <button type="button" class="rep-btn" data-i18n="asXY">坐标表示</button>
           </div>
           <dl class="readout">
-            <dt class="row-polar">大小</dt>
+            <dt class="row-polar" data-i18n="mag">大小</dt>
             <dd class="row-polar">
-              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="B 大小" value="3.16" />
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="B 大小" data-i18n-label="magBInput" value="3.16" />
             </dd>
-            <dt class="row-polar">方向</dt>
+            <dt class="row-polar" data-i18n="dir">方向</dt>
             <dd class="row-polar">
-              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="B 方向" value="71.6" />
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="B 方向" data-i18n-label="dirBInput" value="71.6" />
               <span class="unit">°</span>
             </dd>
-            <dt class="row-xy hidden">x 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vx">x 分量</dt>
             <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Bx" value="1.00" /></dd>
-            <dt class="row-xy hidden">y 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vy">y 分量</dt>
             <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="By" value="3.00" /></dd>
           </dl>
           <div class="lock-bar">
-            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
-            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长" data-i18n-title="lockMagShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockMag">锁模长</span></button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度" data-i18n-title="lockAngShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockAng">锁角度</span></button>
           </div>
         </div>
         <div class="card hidden" id="p2-r-card">
           <div class="vec-head">
-            <h2 class="vec-r">合矢量 R = A + B</h2>
-            <button type="button" class="rep-btn" id="p2r-rep">坐标表示</button>
+            <h2 class="vec-r" data-i18n="vecR">合矢量 R = A + B</h2>
+            <button type="button" class="rep-btn" id="p2r-rep" data-i18n="asXY">坐标表示</button>
           </div>
           <dl class="readout" id="ed-p2r">
-            <dt class="row-polar">大小</dt>
+            <dt class="row-polar" data-i18n="mag">大小</dt>
             <dd class="row-polar"><input data-k="mag" type="text" readonly tabindex="-1" value="6.40" /></dd>
-            <dt class="row-polar">方向</dt>
+            <dt class="row-polar" data-i18n="dir">方向</dt>
             <dd class="row-polar"><input data-k="ang" type="text" readonly tabindex="-1" value="38.7" /><span class="unit">°</span></dd>
-            <dt class="row-xy hidden">x 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vx">x 分量</dt>
             <dd class="row-xy hidden"><input data-k="vx" type="text" readonly tabindex="-1" value="5.00" /></dd>
-            <dt class="row-xy hidden">y 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vy">y 分量</dt>
             <dd class="row-xy hidden"><input data-k="vy" type="text" readonly tabindex="-1" value="4.00" /></dd>
           </dl>
           <div class="formula" id="p2-eq"></div>
@@ -635,76 +669,76 @@
         <div class="card hidden" id="p3-sign"></div>
         <div class="card" id="ed-p3a">
           <div class="vec-head">
-            <h2 class="vec-a">矢量 A</h2>
-            <button type="button" class="rep-btn">坐标表示</button>
+            <h2 class="vec-a" data-i18n="vecA">矢量 A</h2>
+            <button type="button" class="rep-btn" data-i18n="asXY">坐标表示</button>
           </div>
           <dl class="readout">
-            <dt class="row-polar">大小 |A|</dt>
+            <dt class="row-polar" data-i18n="magA">大小 |A|</dt>
             <dd class="row-polar">
-              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="A 大小" value="5.00" />
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="A 大小" data-i18n-label="magAInput" value="5.00" />
             </dd>
-            <dt class="row-polar">方向</dt>
+            <dt class="row-polar" data-i18n="dir">方向</dt>
             <dd class="row-polar">
-              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="A 方向" value="0.0" />
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="A 方向" data-i18n-label="dirAInput" value="0.0" />
               <span class="unit">°</span>
             </dd>
-            <dt class="row-xy hidden">x 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vx">x 分量</dt>
             <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Ax" value="5.00" /></dd>
-            <dt class="row-xy hidden">y 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vy">y 分量</dt>
             <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="Ay" value="0.00" /></dd>
           </dl>
           <div class="lock-bar">
-            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
-            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长" data-i18n-title="lockMagShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockMag">锁模长</span></button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度" data-i18n-title="lockAngShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockAng">锁角度</span></button>
           </div>
         </div>
         <div class="card" id="ed-p3b">
           <div class="vec-head">
-            <h2 class="vec-b">矢量 B</h2>
-            <button type="button" class="rep-btn">坐标表示</button>
+            <h2 class="vec-b" data-i18n="vecB">矢量 B</h2>
+            <button type="button" class="rep-btn" data-i18n="asXY">坐标表示</button>
           </div>
           <dl class="readout">
-            <dt class="row-polar">大小 |B|</dt>
+            <dt class="row-polar" data-i18n="magB">大小 |B|</dt>
             <dd class="row-polar">
-              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="B 大小" value="5.00" />
+              <input data-k="mag" type="text" inputmode="decimal" autocomplete="off" aria-label="B 大小" data-i18n-label="magBInput" value="5.00" />
             </dd>
-            <dt class="row-polar">方向</dt>
+            <dt class="row-polar" data-i18n="dir">方向</dt>
             <dd class="row-polar">
-              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="B 方向" value="53.1" />
+              <input data-k="ang" type="text" inputmode="decimal" autocomplete="off" aria-label="B 方向" data-i18n-label="dirBInput" value="53.1" />
               <span class="unit">°</span>
             </dd>
-            <dt class="row-xy hidden">x 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vx">x 分量</dt>
             <dd class="row-xy hidden"><input data-k="vx" type="text" inputmode="decimal" autocomplete="off" aria-label="Bx" value="3.00" /></dd>
-            <dt class="row-xy hidden">y 分量</dt>
+            <dt class="row-xy hidden" data-i18n="vy">y 分量</dt>
             <dd class="row-xy hidden"><input data-k="vy" type="text" inputmode="decimal" autocomplete="off" aria-label="By" value="4.00" /></dd>
           </dl>
           <div class="lock-bar">
-            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁模长</button>
-            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg>锁角度</button>
+            <button type="button" class="lock-btn" data-lock="mag" aria-pressed="false" title="锁定模长" data-i18n-title="lockMagShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockMag">锁模长</span></button>
+            <button type="button" class="lock-btn" data-lock="ang" aria-pressed="false" title="锁定角度" data-i18n-title="lockAngShort"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 1 1 6 0v2h1.2c.7 0 1.3.6 1.3 1.3v5.4c0 .7-.6 1.3-1.3 1.3H3.8c-.7 0-1.3-.6-1.3-1.3V8.3C2.5 7.6 3.1 7 3.8 7H5zm1.5 0h3V5a1.5 1.5 0 1 0-3 0v2z"/></svg><span data-i18n="lockAng">锁角度</span></button>
           </div>
         </div>
         <div class="card">
-          <h2>夹角</h2>
+          <h2 data-i18n="angleCard">夹角</h2>
           <dl class="readout">
-            <dt>A 与 B 的夹角 θ</dt><dd class="plain" id="p3-th">53.1°</dd>
+            <dt data-i18n="angleAB">A 与 B 的夹角 θ</dt><dd class="plain" id="p3-th">53.1°</dd>
             <dt id="p3-cos-label" class="hidden">cos(θ)</dt><dd class="plain hidden" id="p3-cos">0.60</dd>
           </dl>
         </div>
         <div class="card hidden" id="p3-proj-card">
-          <h2 class="vec-p">B 在 A 上的投影</h2>
+          <h2 class="vec-p" data-i18n="projOnA">B 在 A 上的投影</h2>
           <div class="eq-line" id="p3-proj-eq"></div>
         </div>
         <div class="card hidden" id="p3-dot-card">
-          <h2>点乘</h2>
+          <h2 data-i18n="dotProduct">点乘</h2>
           <div id="p3-dot-body"></div>
         </div>
       </div>
 
       <div class="card">
-        <h2>挑战</h2>
+        <h2 data-i18n="challenge">挑战</h2>
         <div class="challenge-task" id="challenge-text">点击「新挑战」开始练习。</div>
         <div class="challenge-actions">
-          <button id="challenge-btn" class="btn btn-primary" type="button">新挑战</button>
+          <button id="challenge-btn" class="btn btn-primary" type="button" data-i18n="newChallenge">新挑战</button>
         </div>
       </div>
 
@@ -717,6 +751,275 @@
   <script>
     (function () {
       "use strict";
+
+      const I18N = {
+        zh: {
+          title: "矢量画板",
+          langAria: "切换中文 / English",
+          pagesAria: "学习页面",
+          modeAria: "学习模式",
+          addAria: "加法模式",
+          dotAria: "点乘模式",
+          page1: "1 基础",
+          page2: "2 矢量加法",
+          page3: "3 点乘",
+          magDir: "大小与方向",
+          moveVec: "平移矢量",
+          ortho: "正交分解",
+          reset: "重置矢量",
+          twoVec: "两个矢量",
+          headTail: "首尾相接",
+          swapAB: "交换 A 和 B",
+          showComp: "显示分量",
+          relDir: "相对方向",
+          showProj: "显示投影",
+          buildDot: "构成点乘",
+          compFormula: "分量公式",
+          canvasAria: "带可拖动矢量的坐标平面",
+          gridNote: "网格：每格 = 1 个单位",
+          currentVec: "当前矢量",
+          asXY: "坐标表示",
+          asPolar: "大小·方向",
+          fillHint: "可拖动或填写。锁定后，拖箭头时该项保持不变。",
+          mag: "大小",
+          dir: "方向",
+          vx: "x 分量",
+          vy: "y 分量",
+          lockMag: "锁模长",
+          lockAng: "锁角度",
+          lockMagTitle: "锁定模长：拖动时大小不变，只能改变方向",
+          lockAngTitle: "锁定角度：拖动时方向不变，只能改变长短",
+          lockMagShort: "锁定模长",
+          lockAngShort: "锁定角度",
+          wordMag: "大小",
+          vecA: "矢量 A",
+          vecB: "矢量 B",
+          vecR: "合矢量 R = A + B",
+          magA: "大小 |A|",
+          magB: "大小 |B|",
+          magAInput: "A 大小",
+          magBInput: "B 大小",
+          dirAInput: "A 方向",
+          dirBInput: "B 方向",
+          angleCard: "夹角",
+          angleAB: "A 与 B 的夹角 θ",
+          projOnA: "B 在 A 上的投影",
+          dotProduct: "点乘",
+          challenge: "挑战",
+          newChallenge: "新挑战",
+          challengeIdle: "点击「新挑战」开始练习。",
+          sub1: "矢量是既有大小、又有方向的物理量。",
+          sub2: "矢量加法表示两个矢量的共同效果。",
+          sub3: "点乘表示一个矢量沿另一个矢量方向有多少。",
+          hint1: "拖蓝色实心圆，或在右侧填写大小和方向。拖空心圆或箭杆可以平移整根矢量。",
+          hint2: "拖 A、B 的箭头尖改变大小和方向。拖空心圆可以平移该矢量。",
+          hint3: "拖 A、B 的箭头尖。拖公共箭尾可以一起平移。",
+          ins_magnitude: "拖动箭头。把它拉长，什么变了？把它转一转，什么变了？",
+          ins_move: "平移这根矢量，不要改变它的大小和方向。",
+          ins_components: "矢量是斜边。水平分量和竖直分量，就是直角三角形的两条直角边。",
+          add_independent: "现在有两个矢量。怎样找出它们的共同效果？",
+          add_head: "先沿 A 走，再沿 B 走。合矢量给出总的改变。",
+          add_swap: "路径不同，但终点相同。",
+          add_components: "把矢量相加，就是把各个坐标方向上的效果分别相加。",
+          dot_angle: "转动 B。当 B 更指向 A，或更背离 A 时，什么变了？",
+          dot_projection: "投影告诉我们：B 有多少落在 A 的方向上。",
+          dot_build: "A · B = |A| ×（B 在 A 上的投影）。投影再写成 |B| cosθ，就得到点乘。",
+          dot_components: "几何公式和分量公式，描述的是同一个量。",
+          magNearZero: "大小接近 0 时，方向没有意义。",
+          sameVector: "还是同一个矢量！",
+          correct: "正确！",
+          projNone: "A 太短时，投影没有意义。",
+          projLength: "投影长度",
+          projLabel: "投影",
+          buildLine1: "A · B = |A| ×（B 在 A 上的投影）",
+          buildLine2: "投影 = |B| cos(θ)",
+          buildLine3: "所以 A · B = |A||B|cos(θ)",
+          geom: "几何",
+          comps: "分量",
+          signZero: "垂直 → 点乘为零",
+          signPos: "大致同向 → 点乘为正",
+          signNeg: "大致反向 → 点乘为负",
+          ch1_0: "画一个大小为 5、指向东方的矢量。",
+          ch1_1: "画一个大小约为 6、指向北方的矢量。",
+          ch1_2: "画一个大小为 5、方向为 45° 的矢量。",
+          ch1_3: "画一个 x 分量约为 4 的矢量。",
+          ch1_4: "画一个指向西南的矢量。",
+          ch1_5: "画一个大小在 7 到 8 之间的矢量。",
+          ch1_6: "画一个指向西方的矢量。",
+          ch1_7: "画一个大小约为 4、指向南方的矢量。",
+          ch1_8: "画一个 y 分量约为 3 的矢量。",
+          ch1_9: "画一个指向东南的矢量。",
+          ch2_0: "让 A + B 指向正东。",
+          ch2_1: "让 A + B 几乎为零。",
+          ch2_2: "让合矢量的大小约为 5。",
+          ch2_3: "用两个不同的矢量，使它们的和为 ⟨4, 3⟩。",
+          ch2_4: "让 A 与 B 垂直。",
+          ch2_5: "让 A 与 B 方向相反，使得 A + B = 0。",
+          ch2_6: "让 A + B 指向正北。",
+          ch2_7: "让合矢量的 x 分量大约为 0。",
+          ch3_0: "让 A · B = 0。",
+          ch3_1: "让点乘为正。",
+          ch3_2: "让点乘为负。",
+          ch3_3: "让 A 与 B 垂直。",
+          ch3_4: "让 A 与 B 指向同一方向。",
+          ch3_5: "让 A 与 B 指向相反方向。",
+          ch3_6: "让 A · B 大约等于 10。",
+          ch3_7: "保持夹角大致不变，改变点乘的大小。",
+          ch3_8: "保持 |A| 和 |B| 大致不变，让点乘为零。"
+        },
+        en: {
+          title: "Vector Playground",
+          langAria: "Switch Chinese / English",
+          pagesAria: "Pages",
+          modeAria: "Learning mode",
+          addAria: "Addition mode",
+          dotAria: "Dot-product mode",
+          page1: "1 Basics",
+          page2: "2 Addition",
+          page3: "3 Dot product",
+          magDir: "Magnitude & direction",
+          moveVec: "Translate",
+          ortho: "Components",
+          reset: "Reset vector",
+          twoVec: "Two vectors",
+          headTail: "Head to tail",
+          swapAB: "Swap A and B",
+          showComp: "Show components",
+          relDir: "Relative direction",
+          showProj: "Show projection",
+          buildDot: "Build the product",
+          compFormula: "Component formula",
+          canvasAria: "Coordinate plane with a draggable vector",
+          gridNote: "Grid: 1 square = 1 unit",
+          currentVec: "Current vector",
+          asXY: "Coordinates",
+          asPolar: "Mag · dir",
+          fillHint: "Drag or type. A locked quantity stays fixed when you drag the tip.",
+          mag: "Magnitude",
+          dir: "Direction",
+          vx: "x-component",
+          vy: "y-component",
+          lockMag: "Lock mag",
+          lockAng: "Lock angle",
+          lockMagTitle: "Lock magnitude: dragging changes only the direction",
+          lockAngTitle: "Lock angle: dragging changes only the length",
+          lockMagShort: "Lock magnitude",
+          lockAngShort: "Lock angle",
+          wordMag: "magnitude",
+          vecA: "Vector A",
+          vecB: "Vector B",
+          vecR: "Resultant R = A + B",
+          magA: "Magnitude |A|",
+          magB: "Magnitude |B|",
+          magAInput: "A magnitude",
+          magBInput: "B magnitude",
+          dirAInput: "A direction",
+          dirBInput: "B direction",
+          angleCard: "Angle",
+          angleAB: "Angle θ between A and B",
+          projOnA: "Projection of B onto A",
+          dotProduct: "Dot product",
+          challenge: "Challenge",
+          newChallenge: "New challenge",
+          challengeIdle: "Click “New challenge” to practise.",
+          sub1: "A vector has both magnitude and direction.",
+          sub2: "Vector addition is the combined effect of two vectors.",
+          sub3: "The dot product tells how much one vector lies along another.",
+          hint1: "Drag the solid blue tip, or type magnitude and direction. Drag the hollow circle or the shaft to translate.",
+          hint2: "Drag the tips of A and B to change them. Drag a hollow circle to translate that vector.",
+          hint3: "Drag the tips of A and B. Drag the shared tail to translate both.",
+          ins_magnitude: "Drag the arrow. Stretch it — what changes? Rotate it — what changes?",
+          ins_move: "Translate this vector without changing its magnitude or direction.",
+          ins_components: "The vector is the hypotenuse. The horizontal and vertical components are the legs of the right triangle.",
+          add_independent: "There are two vectors. How do you find their combined effect?",
+          add_head: "Walk along A, then along B. The resultant is the total change.",
+          add_swap: "The paths differ, but they end at the same point.",
+          add_components: "Adding vectors means adding their effects in each coordinate direction.",
+          dot_angle: "Rotate B. What changes when B points more along A, or more against A?",
+          dot_projection: "The projection tells how much of B lies along the direction of A.",
+          dot_build: "A · B = |A| × (projection of B onto A). Writing the projection as |B| cos θ gives the dot product.",
+          dot_components: "The geometric formula and the component formula describe the same quantity.",
+          magNearZero: "When the magnitude is near 0, direction is not meaningful.",
+          sameVector: "Still the same vector!",
+          correct: "Correct!",
+          projNone: "When A is too short, the projection is not meaningful.",
+          projLength: "Projection length",
+          projLabel: "proj",
+          buildLine1: "A · B = |A| × (projection of B onto A)",
+          buildLine2: "projection = |B| cos(θ)",
+          buildLine3: "so A · B = |A||B|cos(θ)",
+          geom: "Geometry",
+          comps: "Components",
+          signZero: "Perpendicular → dot product is zero",
+          signPos: "Roughly same direction → dot product is positive",
+          signNeg: "Roughly opposite → dot product is negative",
+          ch1_0: "Draw a vector of magnitude 5 pointing east.",
+          ch1_1: "Draw a vector of magnitude about 6 pointing north.",
+          ch1_2: "Draw a vector of magnitude 5 at 45°.",
+          ch1_3: "Draw a vector whose x-component is about 4.",
+          ch1_4: "Draw a vector pointing southwest.",
+          ch1_5: "Draw a vector whose magnitude is between 7 and 8.",
+          ch1_6: "Draw a vector pointing west.",
+          ch1_7: "Draw a vector of magnitude about 4 pointing south.",
+          ch1_8: "Draw a vector whose y-component is about 3.",
+          ch1_9: "Draw a vector pointing southeast.",
+          ch2_0: "Make A + B point due east.",
+          ch2_1: "Make A + B almost zero.",
+          ch2_2: "Make the resultant magnitude about 5.",
+          ch2_3: "Use two different vectors whose sum is ⟨4, 3⟩.",
+          ch2_4: "Make A and B perpendicular.",
+          ch2_5: "Make A and B opposite so that A + B = 0.",
+          ch2_6: "Make A + B point due north.",
+          ch2_7: "Make the resultant x-component about 0.",
+          ch3_0: "Make A · B = 0.",
+          ch3_1: "Make the dot product positive.",
+          ch3_2: "Make the dot product negative.",
+          ch3_3: "Make A and B perpendicular.",
+          ch3_4: "Make A and B point the same way.",
+          ch3_5: "Make A and B point opposite ways.",
+          ch3_6: "Make A · B about 10.",
+          ch3_7: "Keep the angle roughly the same, but change the size of the dot product.",
+          ch3_8: "Keep |A| and |B| roughly the same, and make the dot product zero."
+        }
+      };
+
+      let lang = "zh";
+      try {
+        if (localStorage.getItem("vp-lang") === "en") lang = "en";
+      } catch (err) {}
+
+      function t(key) {
+        const pack = I18N[lang] || I18N.zh;
+        if (pack[key] != null) return pack[key];
+        if (I18N.zh[key] != null) return I18N.zh[key];
+        return key;
+      }
+
+      function applyStaticLang() {
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          el.textContent = t(el.getAttribute("data-i18n"));
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach(function (el) {
+          el.setAttribute("title", t(el.getAttribute("data-i18n-title")));
+        });
+        document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
+          el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria")));
+        });
+        document.querySelectorAll("[data-i18n-label]").forEach(function (el) {
+          el.setAttribute("aria-label", t(el.getAttribute("data-i18n-label")));
+        });
+        document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+        document.title = t("title");
+        const btn = document.getElementById("lang-toggle");
+        if (btn) {
+          btn.setAttribute("data-lang", lang);
+          btn.setAttribute("aria-label", t("langAria"));
+        }
+      }
+
+      function chText(ch) {
+        return ch ? t(ch.key) : t("challengeIdle");
+      }
 
       // ----- DOM -----
       const canvas = document.getElementById("plane");
@@ -771,12 +1074,6 @@
       const MAX_MAG = 12;
       const MIN_MAG = 0.2;
 
-      const TEXT = {
-        magnitude: "拖动箭头。把它拉长，什么变了？把它转一转，什么变了？",
-        move: "平移这根矢量，不要改变它的大小和方向。",
-        components: "矢量是斜边。水平分量和竖直分量，就是直角三角形的两条直角边。"
-      };
-
       let currentPage = 1;
 
       const COL = {
@@ -807,29 +1104,17 @@
       };
 
       const ADD_TEXT = {
-        independent: "现在有两个矢量。怎样找出它们的共同效果？",
-        head: "先沿 A 走，再沿 B 走。合矢量给出总的改变。",
-        swap: "路径不同，但终点相同。",
-        components: "把矢量相加，就是把各个坐标方向上的效果分别相加。"
+        independent: "add_independent",
+        head: "add_head",
+        swap: "add_swap",
+        components: "add_components"
       };
 
       const DOT_TEXT = {
-        angle: "转动 B。当 B 更指向 A，或更背离 A 时，什么变了？",
-        projection: "投影告诉我们：B 有多少落在 A 的方向上。",
-        build: "A · B = |A| ×（B 在 A 上的投影）。投影再写成 |B| cosθ，就得到点乘。",
-        components: "几何公式和分量公式，描述的是同一个量。"
-      };
-
-      const PAGE_SUB = {
-        1: "矢量是既有大小、又有方向的物理量。",
-        2: "矢量加法表示两个矢量的共同效果。",
-        3: "点乘表示一个矢量沿另一个矢量方向有多少。"
-      };
-
-      const PAGE_HINT = {
-        1: "拖蓝色实心圆，或在右侧填写大小和方向。拖空心圆或箭杆可以平移整根矢量。",
-        2: "拖 A、B 的箭头尖改变大小和方向。拖空心圆可以平移该矢量。",
-        3: "拖 A、B 的箭头尖。拖公共箭尾可以一起平移。"
+        angle: "dot_angle",
+        projection: "dot_projection",
+        build: "dot_build",
+        components: "dot_components"
       };
 
       // ----- Math -----
@@ -1429,7 +1714,7 @@
         ctx.fillStyle = COL.P;
         ctx.font = "600 12px Microsoft YaHei UI, Microsoft YaHei, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("投影", mid.x, mid.y - 12);
+        ctx.fillText(t("projLabel"), mid.x, mid.y - 12);
         ctx.restore();
       }
 
@@ -1786,60 +2071,70 @@
       // ----- Challenges -----
       const CHALLENGES = [
         {
+          key: "ch1_0",
           text: "画一个大小为 5、指向东方的矢量。",
           check: function (mag, ang) {
             return mag >= 2 && near(mag, 5, 0.45) && ang !== null && angleDiff(ang, 0) <= 12;
           }
         },
         {
+          key: "ch1_1",
           text: "画一个大小约为 6、指向北方的矢量。",
           check: function (mag, ang) {
             return near(mag, 6, 0.6) && ang !== null && angleDiff(ang, 90) <= 12;
           }
         },
         {
+          key: "ch1_2",
           text: "画一个大小为 5、方向为 45° 的矢量。",
           check: function (mag, ang) {
             return near(mag, 5, 0.45) && ang !== null && angleDiff(ang, 45) <= 10;
           }
         },
         {
+          key: "ch1_3",
           text: "画一个 x 分量约为 4 的矢量。",
           check: function (mag, ang, vx) {
             return near(vx, 4, 0.45);
           }
         },
         {
+          key: "ch1_4",
           text: "画一个指向西南的矢量。",
           check: function (mag, ang) {
             return mag >= 2 && ang !== null && angleDiff(ang, 225) <= 22;
           }
         },
         {
+          key: "ch1_5",
           text: "画一个大小在 7 到 8 之间的矢量。",
           check: function (mag) {
             return mag >= 6.9 && mag <= 8.1;
           }
         },
         {
+          key: "ch1_6",
           text: "画一个指向西方的矢量。",
           check: function (mag, ang) {
             return mag >= 2 && ang !== null && angleDiff(ang, 180) <= 14;
           }
         },
         {
+          key: "ch1_7",
           text: "画一个大小约为 4、指向南方的矢量。",
           check: function (mag, ang) {
             return near(mag, 4, 0.5) && ang !== null && angleDiff(ang, 270) <= 12;
           }
         },
         {
+          key: "ch1_8",
           text: "画一个 y 分量约为 3 的矢量。",
           check: function (mag, ang, vx, vy) {
             return near(vy, 3, 0.45);
           }
         },
         {
+          key: "ch1_9",
           text: "画一个指向东南的矢量。",
           check: function (mag, ang) {
             return mag >= 2 && ang !== null && angleDiff(ang, 315) <= 22;
@@ -1849,24 +2144,28 @@
 
       const ADD_CHALLENGES = [
         {
+          key: "ch2_0",
           text: "让 A + B 指向正东。",
           check: function (A, B, R) {
             return R.mag >= 2 && R.ang !== null && angleDiff(R.ang, 0) <= 14;
           }
         },
         {
+          key: "ch2_1",
           text: "让 A + B 几乎为零。",
           check: function (A, B, R) {
             return R.mag < 0.85;
           }
         },
         {
+          key: "ch2_2",
           text: "让合矢量的大小约为 5。",
           check: function (A, B, R) {
             return near(R.mag, 5, 0.6);
           }
         },
         {
+          key: "ch2_3",
           text: "用两个不同的矢量，使它们的和为 ⟨4, 3⟩。",
           check: function (A, B, R) {
             return near(R.vx, 4, 0.5) && near(R.vy, 3, 0.5) && A.mag > 0.8 && B.mag > 0.8 &&
@@ -1874,24 +2173,28 @@
           }
         },
         {
+          key: "ch2_4",
           text: "让 A 与 B 垂直。",
           check: function (A, B) {
             return A.mag > 1.5 && B.mag > 1.5 && Math.abs(A.vx * B.vx + A.vy * B.vy) < 1.2;
           }
         },
         {
+          key: "ch2_5",
           text: "让 A 与 B 方向相反，使得 A + B = 0。",
           check: function (A, B, R) {
             return A.mag > 1.5 && B.mag > 1.5 && R.mag < 0.85;
           }
         },
         {
+          key: "ch2_6",
           text: "让 A + B 指向正北。",
           check: function (A, B, R) {
             return R.mag >= 2 && R.ang !== null && angleDiff(R.ang, 90) <= 14;
           }
         },
         {
+          key: "ch2_7",
           text: "让合矢量的 x 分量大约为 0。",
           check: function (A, B, R) {
             return Math.abs(R.vx) < 0.55 && R.mag > 1.5;
@@ -1901,48 +2204,56 @@
 
       const DOT_CHALLENGES = [
         {
+          key: "ch3_0",
           text: "让 A · B = 0。",
           check: function (d) {
             return d.ma > 1.5 && d.mb > 1.5 && Math.abs(d.dot) < 1.1;
           }
         },
         {
+          key: "ch3_1",
           text: "让点乘为正。",
           check: function (d) {
             return d.dot > 2;
           }
         },
         {
+          key: "ch3_2",
           text: "让点乘为负。",
           check: function (d) {
             return d.dot < -2;
           }
         },
         {
+          key: "ch3_3",
           text: "让 A 与 B 垂直。",
           check: function (d) {
             return d.ma > 1.5 && d.mb > 1.5 && d.th !== null && Math.abs(d.th - 90) <= 12;
           }
         },
         {
+          key: "ch3_4",
           text: "让 A 与 B 指向同一方向。",
           check: function (d) {
             return d.ma > 1.5 && d.mb > 1.5 && d.th !== null && d.th <= 14;
           }
         },
         {
+          key: "ch3_5",
           text: "让 A 与 B 指向相反方向。",
           check: function (d) {
             return d.ma > 1.5 && d.mb > 1.5 && d.th !== null && d.th >= 166;
           }
         },
         {
+          key: "ch3_6",
           text: "让 A · B 大约等于 10。",
           check: function (d) {
             return near(d.dot, 10, 1.3);
           }
         },
         {
+          key: "ch3_7",
           text: "保持夹角大致不变，改变点乘的大小。",
           start: function (d) {
             return { th: d.th, dot: d.dot };
@@ -1953,6 +2264,7 @@
           }
         },
         {
+          key: "ch3_8",
           text: "保持 |A| 和 |B| 大致不变，让点乘为零。",
           start: function (d) {
             return { ma: d.ma, mb: d.mb };
@@ -2011,33 +2323,31 @@
         return ch.check(mag, ang, state.vx, state.vy);
       }
 
-      function pickChallenge(list, current) {
-        const pool = list.filter(function (c) { return c.text !== current; });
+      function pickChallenge(list, currentKey) {
+        const pool = list.filter(function (c) { return c.key !== currentKey; });
         return pool[Math.floor(Math.random() * pool.length)] || list[0];
       }
 
       function newChallenge() {
         if (currentPage === 2) {
-          const pick = pickChallenge(ADD_CHALLENGES, add.challenge && add.challenge.text);
+          const pick = pickChallenge(ADD_CHALLENGES, add.challenge && add.challenge.key);
           add.challenge = pick;
           add.snap = pick.start ? pick.start(addStats()) : null;
-          challengeText.textContent = pick.text;
+          challengeText.textContent = chText(pick);
           updateUI();
           return;
         }
         if (currentPage === 3) {
-          const pick = pickChallenge(DOT_CHALLENGES, dotp.challenge && dotp.challenge.text);
+          const pick = pickChallenge(DOT_CHALLENGES, dotp.challenge && dotp.challenge.key);
           dotp.challenge = pick;
           dotp.snap = pick.start ? pick.start(dotStats()) : null;
-          challengeText.textContent = pick.text;
+          challengeText.textContent = chText(pick);
           updateUI();
           return;
         }
-        const current = state.challenge && state.challenge.text;
-        const pool = CHALLENGES.filter(function (c) { return c.text !== current; });
-        const pick = pool[Math.floor(Math.random() * pool.length)] || CHALLENGES[0];
+        const pick = pickChallenge(CHALLENGES, state.challenge && state.challenge.key);
         state.challenge = pick;
-        challengeText.textContent = pick.text;
+        challengeText.textContent = chText(pick);
         updateUI();
       }
 
@@ -2058,7 +2368,7 @@
           state.ghost = null;
         }
 
-        instructionEl.textContent = TEXT[mode];
+        instructionEl.textContent = t("ins_" + mode);
         if (currentPage === 1) {
           updateUI();
           draw();
@@ -2105,7 +2415,7 @@
         for (let i = 0; i < polarRows.length; i++) polarRows[i].classList.toggle("hidden", !polar);
         for (let i = 0; i < xyRows.length; i++) xyRows[i].classList.toggle("hidden", polar);
         const btn = root.querySelector(".rep-btn");
-        if (btn) btn.textContent = polar ? "坐标表示" : "大小·方向";
+        if (btn) btn.textContent = polar ? t("asXY") : t("asPolar");
       }
 
       function applyVecField(vec, kind, raw, restoreIfInvalid) {
@@ -2192,7 +2502,7 @@
       }
 
       function updatePage1UI() {
-        instructionEl.textContent = TEXT[state.mode];
+        instructionEl.textContent = t("ins_" + state.mode);
         syncEditor(state, "ed-p1");
         const mag = calculateMagnitude(state.vx, state.vy);
         const ang = calculateAngle(state.vx, state.vy);
@@ -2206,16 +2516,16 @@
               "<br>" +
               '<span class="vy">v<sub>y</sub></span> = ' + format(mag, 2) + " × sin(" + format(ang, 1) + "°) = " + format(state.vy, 2);
           } else {
-            formulaLive.textContent = "大小接近 0 时，方向没有意义。";
+            formulaLive.textContent = t("magNearZero");
           }
         }
 
         let message = "";
         if (state.mode === "move" && sameAsGhost()) {
-          message = "还是同一个矢量！";
+          message = t("sameVector");
         }
         if (state.challenge && checkChallenge()) {
-          message = message ? message + "  正确！" : "正确！";
+          message = message ? message + "  " + t("correct") : t("correct");
         }
 
         statusEl.textContent = message;
@@ -2254,8 +2564,8 @@
             "<div class=\"live\">R = ⟨" + format(s.R.vx, 2) + ", " + format(s.R.vy, 2) + "⟩</div>";
         }
 
-        instructionEl.textContent = ADD_TEXT[add.mode];
-        const message = add.challenge && checkChallenge() ? "正确！" : "";
+        instructionEl.textContent = t(ADD_TEXT[add.mode]);
+        const message = add.challenge && checkChallenge() ? t("correct") : "";
         statusEl.textContent = message;
         statusEl.classList.toggle("visible", !!message);
       }
@@ -2276,10 +2586,10 @@
         const projEl = document.getElementById("p3-proj-eq");
         if (showProj) {
           if (!d.proj || d.th === null) {
-            projEl.textContent = "A 太短时，投影没有意义。";
+            projEl.textContent = t("projNone");
           } else {
             projEl.innerHTML =
-              "投影长度 = |B| cos(θ) = " + format(d.mb, 2) + " × " + format(d.cos, 2) + " = " + format(d.proj.length, 2);
+              t("projLength") + " = |B| cos(θ) = " + format(d.mb, 2) + " × " + format(d.cos, 2) + " = " + format(d.proj.length, 2);
           }
         }
 
@@ -2290,22 +2600,22 @@
           const projLen = d.proj ? d.proj.length : 0;
           let html = "";
           if (dotp.mode === "build") {
-            html += "<div class=\"eq-line\">A · B = |A| ×（B 在 A 上的投影）</div>";
-            html += "<div class=\"eq-line\">投影 = |B| cos(θ)</div>";
-            html += "<div class=\"eq-line\">所以 A · B = |A||B|cos(θ)</div>";
+            html += "<div class=\"eq-line\">" + t("buildLine1") + "</div>";
+            html += "<div class=\"eq-line\">" + t("buildLine2") + "</div>";
+            html += "<div class=\"eq-line\">" + t("buildLine3") + "</div>";
             if (d.th !== null) {
-              html += "<div class=\"live eq-line\">投影 = " + format(d.mb, 2) + " cos(" + format(d.th, 1) + "°) = " + format(projLen, 2) + "</div>";
+              html += "<div class=\"live eq-line\">" + t("projLabel") + " = " + format(d.mb, 2) + " cos(" + format(d.th, 1) + "°) = " + format(projLen, 2) + "</div>";
               html += "<div class=\"eq-line\"><strong>A · B = " + format(d.ma, 2) + " × " + format(projLen, 2) + " = " + format(d.dot, 2) + "</strong></div>";
             }
           } else {
             html += "<div class=\"split\">";
-            html += "<div><div class=\"eq-line\">几何</div>";
+            html += "<div><div class=\"eq-line\">" + t("geom") + "</div>";
             html += "<div class=\"eq-line\">A · B = |A||B|cosθ</div>";
             if (d.th !== null) {
               html += "<div class=\"live eq-line\">= " + format(d.ma, 2) + " × " + format(d.mb, 2) + " × " + format(d.cos, 2) + "</div>";
             }
             html += "<div class=\"eq-line\"><strong>= " + format(d.dot, 2) + "</strong></div></div>";
-            html += "<div><div class=\"eq-line\">分量</div>";
+            html += "<div><div class=\"eq-line\">" + t("comps") + "</div>";
             html += "<div class=\"eq-line\">A = ⟨" + format(d.ax, 2) + ", " + format(d.ay, 2) + "⟩</div>";
             html += "<div class=\"eq-line\">B = ⟨" + format(d.bx, 2) + ", " + format(d.by, 2) + "⟩</div>";
             html += "<div class=\"eq-line\">A · B = A<sub>x</sub>B<sub>x</sub> + A<sub>y</sub>B<sub>y</sub></div>";
@@ -2321,19 +2631,19 @@
         sign.classList.remove("pos", "zero", "neg");
         if (showSign) {
           if (Math.abs(d.th - 90) <= 8) {
-            sign.textContent = "垂直 → 点乘为零";
+            sign.textContent = t("signZero");
             sign.classList.add("sign-card", "zero");
           } else if (d.th < 90) {
-            sign.textContent = "大致同向 → 点乘为正";
+            sign.textContent = t("signPos");
             sign.classList.add("sign-card", "pos");
           } else {
-            sign.textContent = "大致反向 → 点乘为负";
+            sign.textContent = t("signNeg");
             sign.classList.add("sign-card", "neg");
           }
         }
 
-        instructionEl.textContent = DOT_TEXT[dotp.mode];
-        const message = dotp.challenge && checkChallenge() ? "正确！" : "";
+        instructionEl.textContent = t(DOT_TEXT[dotp.mode]);
+        const message = dotp.challenge && checkChallenge() ? t("correct") : "";
         statusEl.textContent = message;
         statusEl.classList.toggle("visible", !!message);
       }
@@ -2450,11 +2760,11 @@
 
       function syncChallengeLabel() {
         if (currentPage === 2) {
-          challengeText.textContent = add.challenge ? add.challenge.text : "点击「新挑战」开始练习。";
+          challengeText.textContent = chText(add.challenge);
         } else if (currentPage === 3) {
-          challengeText.textContent = dotp.challenge ? dotp.challenge.text : "点击「新挑战」开始练习。";
+          challengeText.textContent = chText(dotp.challenge);
         } else {
-          challengeText.textContent = state.challenge ? state.challenge.text : "点击「新挑战」开始练习。";
+          challengeText.textContent = chText(state.challenge);
         }
       }
 
@@ -2470,8 +2780,8 @@
         document.getElementById("panel-p1").classList.toggle("hidden", n !== 1);
         document.getElementById("panel-p2").classList.toggle("hidden", n !== 2);
         document.getElementById("panel-p3").classList.toggle("hidden", n !== 3);
-        document.getElementById("subtitle").textContent = PAGE_SUB[n];
-        document.getElementById("page-hint").textContent = PAGE_HINT[n];
+        document.getElementById("subtitle").textContent = t("sub" + n);
+        document.getElementById("page-hint").textContent = t("hint" + n);
         syncChallengeLabel();
         updateUI();
         draw();
@@ -2501,6 +2811,16 @@
       document.getElementById("dot-proj").addEventListener("click", function () { setDotMode("projection"); });
       document.getElementById("dot-build").addEventListener("click", function () { setDotMode("build"); });
       document.getElementById("dot-comp").addEventListener("click", function () { setDotMode("components"); });
+      document.getElementById("lang-toggle").addEventListener("click", function () {
+        lang = lang === "zh" ? "en" : "zh";
+        try { localStorage.setItem("vp-lang", lang); } catch (err) {}
+        applyStaticLang();
+        document.getElementById("subtitle").textContent = t("sub" + currentPage);
+        document.getElementById("page-hint").textContent = t("hint" + currentPage);
+        syncChallengeLabel();
+        updateUI();
+        draw();
+      });
 
       // ----- Layout -----
       function resizeCanvas() {
@@ -2525,6 +2845,10 @@
         new ResizeObserver(resizeCanvas).observe(stage);
       }
 
+      applyStaticLang();
+      document.getElementById("subtitle").textContent = t("sub" + currentPage);
+      document.getElementById("page-hint").textContent = t("hint" + currentPage);
+      syncChallengeLabel();
       setMode("magnitude");
       resizeCanvas();
       updateUI();
